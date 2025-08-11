@@ -23,4 +23,6 @@ class Car:
             "date":date
         }
 
-        self.menntnce_logs.append(log)
+        self.maintence_logs.append(log)
+    def get_maintance_history(self):
+        return sorted(self.maintence_logs,key=lambda x:x['date'])
