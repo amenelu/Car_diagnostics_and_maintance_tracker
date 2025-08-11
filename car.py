@@ -6,4 +6,21 @@ class Car:
         self.milage=milage
         self.vin=vin
         self.menntnce_logs=[]
+    def add_milge(self,miles):
+        if miles>0:
+            miles+= self.milage
+        else:
+            rasie value error('miles must be positive')
+    
+    def log_maintance(self,service_type,coast,date=None):
+        if date is None:
+            date=datetime.date.today.isoformat()
         
+        log={
+            "service":service_type,
+            "coast":coast,
+            "milage":self.milage,
+            "date":date
+        }
+
+        self.menntnce_logs.append(log)
