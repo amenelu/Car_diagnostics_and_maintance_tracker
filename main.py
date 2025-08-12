@@ -19,7 +19,7 @@ def add_service_record():
     if not cars:
         print("No car found. Please add a car first.")
         return
-    list_cars():
+        list_cars():
         car_index=int(input("Enter the index of the car:"))-1
         if car_index<0 or car_index>=len(cars):
             print("Invalid car index. Please try again.")
@@ -27,11 +27,11 @@ def add_service_record():
 
         service_type=input("Enter the service type:")
         milage=int(input("Enter the service milage:"))
-        coast=input("Enter the service coast:")
+        cost=input("Enter the service coast:")
         date=input("Enter the service date (YYYY-MM-DD):")
         # convert date to datetime
         date=datetime.datetime.strptime(date,"%Y-%m-%d").date()
-        car[car_index].log_maintance(service_type,coast,date,milage)
+        cars[car_index].log_maintance(service_type,cost,date,milage)
         print("Service record added successfully")
 
 

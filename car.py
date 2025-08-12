@@ -7,7 +7,7 @@ class Car:
         self.year=year
         self.milage=milage
         self.vin=vin
-        self.menntnce_logs=[]
+        self.maintence_logs=[]
     def add_milage(self,miles):
         if miles>0:
             miles+= self.milage
@@ -20,7 +20,7 @@ class Car:
         
         log={
             "service":service_type,
-            "coast":coast,
+            "cost":cost,
             "milage":self.milage,
             "date":date
         }
