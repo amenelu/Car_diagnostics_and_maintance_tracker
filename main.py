@@ -1,6 +1,39 @@
 import Car from car
+import datetime
 
 cars=[]
+
+def add_car():
+    make=input("Enter the car make:")
+    model=input("Enter the car model:")
+    year=int(input("Enter the car year:"))
+    milage=int(input("Enter the car milage:"))
+    vin=int(input("Enter the car vin:"))
+    # create new car 
+    new_car=Car(make,model,year,milage,vin)
+
+    # add to the dictionary
+    cars.append(new_car)
+    print("Car added successfully")
+def add_service_record():
+    if not cars:
+        print("No car found. Please add a car first.")
+        return
+    list_cars():
+        car_index=int(input("Enter the index of the car:"))-1
+        if car_index<0 or car_index>=len(cars):
+            print("Invalid car index. Please try again.")
+            return
+
+        service_type=input("Enter the service type:")
+        milage=int(input("Enter the service milage:"))
+        coast=input("Enter the service coast:")
+        date=input("Enter the service date (YYYY-MM-DD):")
+        # convert date to datetime
+        date=datetime.datetime.strptime(date,"%Y-%m-%d").date()
+        car[car_index].log_maintance(service_type,coast,date,milage)
+        print("Service record added successfully")
+
 
 while True:
     print("\n Car Tracker Menu\n")
@@ -15,6 +48,7 @@ while True:
         print("Add a new car")
     elif choice=="2":
         print("Add  service record to a car")
+        cars.log_maintance()
     elif choice=="3":
         print("View a car's service history")
     elif choice=="4":
@@ -24,12 +58,3 @@ while True:
         break
     else:
         print("Invalid choice. Please input a number between 1 and 5.")
-
-while True:
-    car_make=input("Enter the car make:")
-    car_model=input("Enter the car model:")
-    car_year=input("Enter the car year:")
-    car_milage=input("Enter the car milage:")
-    car_vin=input("Enter the car vin:")
-    car=Car(car_make,car_model,car_year,car_milage,car_vin)
-    cars.append(car)
