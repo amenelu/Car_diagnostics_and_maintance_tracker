@@ -47,3 +47,5 @@ class Car:
             return True
 
         return False
+    def __str__(self):
+        return f"{self.year} {self.make} {self.model}  {self.vin} {self.milage}miles"
