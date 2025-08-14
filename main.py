@@ -74,7 +74,7 @@ while True:
         add_service_record()
     elif choice=="3":
         print("View a car's service history")
-        
+        service_history()
     elif choice=="4":
         print("Check if a car is due for service")
     elif choice=="5":
