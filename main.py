@@ -22,23 +22,38 @@ def list_cars():
         return
     for index,car in enumerate(cars):
         print(f"{index+1}. {car}")
+
+def service_history():
+    if not cars:    
+        print("No car found. Please add a car first.")
+        return
+    list_cars()
+    car_index=int(input("Enter the index of the car:"))-1
+    if car_index<0 or car_index>=len(cars):    
+        print("Invalid car index. Please try again.")
+        return            
+    car=cars[car_index]
+    print(car.get_maintenance_history())   
+
 def add_service_record():
     if not cars:
         print("No car found. Please add a car first.")
         return
-    list_cars():
+    list_cars()
     car_index=int(input("Enter the index of the car:"))-1
     if car_index<0 or car_index>=len(cars):
         print("Invalid car index. Please try again.")
         return
-
-    service=input("Enter the service type:")
+    service_type=input("Enter the service type:")
     milage=int(input("Enter the service milage:"))
-    cost=input("Enter the service coast:")
-    date=input("Enter the service date (YYYY-MM-DD):")
-    # convert date to datetime
-    date=datetime.datetime.strptime(date,"%Y-%m-%d").date()
-    cars[car_index].log_maintence(service,cost,date,milage)
+    cost=input("Enter the service cost:")
+    # date is optional
+    date=input("Enter the service date (YYYY-MM-DD) or press Enter to use today's date:")
+    if not date:
+        date=datetime.date.today()
+    else:
+        date=datetime.datetime.strptime(date,"%Y-%m-%d").date()
+    cars[car_index].log_maintenance(service_type,cost,date,milage)
     print("Service record added successfully")
 
 
