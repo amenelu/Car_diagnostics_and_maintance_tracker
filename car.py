@@ -1,45 +1,45 @@
 import datetime
 
 class Car:
-    def __init__(self, make, model, year, mileage, vin):
+    def __init__(self, make, model, year, milage, vin):
         self.make = make
         self.model = model
         self.year = year
-        self.mileage = mileage
+        self.milage = milage
         self.vin = vin
-        self.maintenance_logs = []
+        self.maintence_logs = []
 
-    def add_mileage(self, miles):
+    def add_milage(self, miles):
         if miles > 0:
-            self.mileage += miles
+            self.milage += miles
         else:
             raise ValueError("Miles must be positive")
 
-    def log_maintenance(self, service_type, cost, date=None):
+    def log_maintence(self, service_type, cost,milage=None, date=None):
         if date is None:
             date = datetime.date.today().isoformat()
 
         log = {
             "service": service_type,
             "cost": cost,
-            "mileage": self.mileage,
+            "milage": milage if milage is not None else self.milage,
             "date": date
         }
 
-        self.maintenance_logs.append(log)
+        self.maintence_logs.append(log)
 
-    def get_maintenance_history(self):
-        return sorted(self.maintenance_logs, key=lambda x: x['date'])
+    def get_maintence_history(self):
+        return sorted(self.maintence_logs, key=lambda x: x['date'])
 
-    def needs_maintenance(self, service_interval):
-        if not self.maintenance_logs:
+    def needs_maintence(self, service_interval):
+        if not self.maintence_logs:
             return True
 
-        last_service = max(self.maintenance_logs, key=lambda x: x['date'])
+        last_service = max(self.maintence_logs, key=lambda x: x['date'])
 
-        # Check mileage gap
-        mileage_gap = self.mileage - last_service['mileage']
-        if mileage_gap >= service_interval:
+        # Check milage gap
+        milage_gap = self.milage - last_service['milage']
+        if milage_gap >= service_interval:
             return True
 
         # Check time gap
@@ -51,4 +51,4 @@ class Car:
         return False
 
     def __str__(self):
-        return f"{self.year} {self.make} {self.model} (VIN: {self.vin}, Mileage: {self.mileage})"
+        return f"{self.year} {self.make} {self.model} (VIN: {self.vin}, milage: {self.milage})"
