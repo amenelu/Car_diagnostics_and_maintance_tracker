@@ -1,4 +1,4 @@
-import Car from car
+from car import Car
 import datetime
 
 cars=[]
@@ -15,24 +15,31 @@ def add_car():
     # add to the dictionary
     cars.append(new_car)
     print("Car added successfully")
+
+def list_cars():
+    if not cars:
+        print("No car found. Please add a car first.")
+        return
+    for index,car in enumerate(cars):
+        print(f"{index+1}. {car}")
 def add_service_record():
     if not cars:
         print("No car found. Please add a car first.")
         return
-        list_cars():
-        car_index=int(input("Enter the index of the car:"))-1
-        if car_index<0 or car_index>=len(cars):
-            print("Invalid car index. Please try again.")
-            return
+    list_cars():
+    car_index=int(input("Enter the index of the car:"))-1
+    if car_index<0 or car_index>=len(cars):
+        print("Invalid car index. Please try again.")
+        return
 
-        service_type=input("Enter the service type:")
-        milage=int(input("Enter the service milage:"))
-        cost=input("Enter the service coast:")
-        date=input("Enter the service date (YYYY-MM-DD):")
-        # convert date to datetime
-        date=datetime.datetime.strptime(date,"%Y-%m-%d").date()
-        cars[car_index].log_maintance(service_type,cost,date,milage)
-        print("Service record added successfully")
+    service=input("Enter the service type:")
+    milage=int(input("Enter the service milage:"))
+    cost=input("Enter the service coast:")
+    date=input("Enter the service date (YYYY-MM-DD):")
+    # convert date to datetime
+    date=datetime.datetime.strptime(date,"%Y-%m-%d").date()
+    cars[car_index].log_maintence(service,cost,date,milage)
+    print("Service record added successfully")
 
 
 while True:
@@ -46,11 +53,13 @@ while True:
     choice=input("Enter your choice:")
     if choice=="1":
         print("Add a new car")
+        add_car()
     elif choice=="2":
         print("Add  service record to a car")
-        cars.log_maintance()
+        add_service_record()
     elif choice=="3":
         print("View a car's service history")
+        
     elif choice=="4":
         print("Check if a car is due for service")
     elif choice=="5":
