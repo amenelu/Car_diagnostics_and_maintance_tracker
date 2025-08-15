@@ -7,7 +7,7 @@ class Car:
         self.year = year
         self.milage = milage
         self.vin = vin
-        self.maintence_logs = []
+        self.maintenance_logs = []
 
     def add_milage(self, miles):
         if miles > 0:
@@ -15,7 +15,7 @@ class Car:
         else:
             raise ValueError("Miles must be positive")
 
-    def log_maintence(self, service_type, cost,milage=None, date=None):
+    def log_maintenance(self, service_type, cost,milage=None, date=None):
         if date is None:
             date = datetime.date.today().isoformat()
 
@@ -26,16 +26,16 @@ class Car:
             "date": date
         }
 
-        self.maintence_logs.append(log)
+        self.maintenance_logs.append(log)
 
-    def get_maintence_history(self):
-        return sorted(self.maintence_logs, key=lambda x: x['date'])
+    def get_maintenance_history(self):
+        return sorted(self.maintenance_logs, key=lambda x: x['date'])
 
-    def needs_maintence(self, service_interval):
-        if not self.maintence_logs:
+    def needs_maintenance(self, service_interval):
+        if not self.maintenance_logs:
             return True
 
-        last_service = max(self.maintence_logs, key=lambda x: x['date'])
+        last_service = max(self.maintenance_logs, key=lambda x: x['date'])
 
         # Check milage gap
         milage_gap = self.milage - last_service['milage']
