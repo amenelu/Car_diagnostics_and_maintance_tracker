@@ -56,6 +56,21 @@ def add_service_record():
     cars[car_index].log_maintenance(service_type,cost,date,milage)
     print("Service record added successfully")
 
+    def needs_service():
+        if not cars:
+            print("No car found. Please add a car first.")
+            return
+        list_cars()
+        car_index=int(input("Enter the index of the car:"))-1
+        if car_index<0 or car_index>=len(cars):
+            print("Invalid car index. Please try again.")
+            return
+        service_interval=int(input("Enter the service interval:"))
+        if cars[car_index].needs_maintenance(service_interval):
+            print("The car needs maintenance.")
+        else:
+            print("The car does not need maintenance.")
+
 
 while True:
     print("\n Car Tracker Menu\n")
@@ -77,6 +92,7 @@ while True:
         service_history()
     elif choice=="4":
         print("Check if a car is due for service")
+        needs_service()
     elif choice=="5":
         print("Exiting... Goodbye")
         break
