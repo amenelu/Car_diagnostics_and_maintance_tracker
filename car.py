@@ -19,26 +19,36 @@ class Car:
         if date is None:
             date = datetime.date.today().isoformat()
 
+        # Determine the mileage for this specific log entry
+        log_milage = milage if milage is not None else self.milage
+
         log = {
             "service": service_type,
             "cost": cost,
-            "milage": milage if milage is not None else self.milage,
+            "milage": log_milage,
             "date": date
         }
 
         self.maintenance_logs.append(log)
 
+        # Also update the car's primary mileage if this service record's mileage is higher
+        if log_milage > self.milage:
+            self.milage = log_milage
+
     def get_maintenance_history(self):
         return sorted(self.maintenance_logs, key=lambda x: x['date'])
 
-    def needs_maintenance(self, service_interval):
+    def needs_maintenance(self, service_interval, current_mileage=None):
         if not self.maintenance_logs:
             return True
+
+        # Use the provided current_mileage for the check, otherwise default to the car's last known mileage.
+        effective_mileage = current_mileage if current_mileage is not None else self.milage
 
         last_service = max(self.maintenance_logs, key=lambda x: x['date'])
 
         # Check milage gap
-        milage_gap = self.milage - last_service['milage']
+        milage_gap = effective_mileage - last_service['milage']
         if milage_gap >= service_interval:
             return True
 

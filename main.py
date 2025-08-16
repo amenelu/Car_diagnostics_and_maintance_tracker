@@ -92,8 +92,15 @@ def needs_service():
     if not car:
         return
     
-    service_interval = _get_user_input_int("Enter the service interval:")
-    if car.needs_maintenance(service_interval):
+    # Prompt for the car's CURRENT mileage to get an accurate check
+    current_mileage = _get_user_input_int(f"Enter the car's current mileage (last known: {car.milage}): ")
+    if current_mileage < car.milage:
+        print(f"Warning: Current mileage ({current_mileage}) is less than the last recorded mileage ({car.milage}).")
+        # Proceeding anyway, but this warns the user of a potential typo.
+
+    service_interval = _get_user_input_int("Enter the service interval (in miles): ")
+
+    if car.needs_maintenance(service_interval, current_mileage=current_mileage):
         print("The car needs maintenance.")
     else:
         print("The car does not need maintenance.")
