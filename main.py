@@ -1,13 +1,20 @@
-from car import Car
+from car import Car, SERVICE_INTERVALS
 import datetime
 
 cars=[]
 
-def _get_user_input_int(prompt):
-    """Helper function to get a valid integer from the user."""
+def _get_user_input_int(prompt, min_val=None, max_val=None):
+    """Helper function to get a valid integer from the user within an optional range."""
     while True:
         try:
-            return int(input(prompt))
+            value = int(input(prompt))
+            if min_val is not None and value < min_val:
+                print(f"Input must be at least {min_val}.")
+                continue
+            if max_val is not None and value > max_val:
+                print(f"Input must be no more than {max_val}.")
+                continue
+            return value
         except ValueError:
             print("Invalid input. Please enter a whole number.")
 
@@ -26,8 +33,9 @@ def _select_car():
 def add_car():
     make=input("Enter the car make:")
     model=input("Enter the car model:")
-    year=_get_user_input_int("Enter the car year:")
-    milage=_get_user_input_int("Enter the car milage:")
+    current_year = datetime.date.today().year
+    year=_get_user_input_int(f"Enter the car year (1900-{current_year+1}): ", min_val=1900, max_val=current_year + 1)
+    milage=_get_user_input_int("Enter the car milage: ", min_val=0)
     vin=input("Enter the car vin:") # VINs can have letters, should be a string
     # create new car 
     new_car=Car(make,model,year,milage,vin)
@@ -63,6 +71,10 @@ def add_service_record():
 
     service_type=input("Enter the service type:")
     milage=_get_user_input_int("Enter the service milage:")
+
+    # Warn user if entering a mileage lower than the car's last known mileage
+    if milage < car.milage:
+        print(f"Warning: The entered mileage ({milage}) is lower than the car's last recorded mileage ({car.milage}).")
     
     while True:
         try:
@@ -92,15 +104,18 @@ def needs_service():
     if not car:
         return
     
+    # Ask which service to check
+    print("Which service would you like to check?")
+    print(f"Known services: {', '.join(SERVICE_INTERVALS.keys())}")
+    service_type = input("Enter the service type: ").lower()
+
     # Prompt for the car's CURRENT mileage to get an accurate check
     current_mileage = _get_user_input_int(f"Enter the car's current mileage (last known: {car.milage}): ")
     if current_mileage < car.milage:
         print(f"Warning: Current mileage ({current_mileage}) is less than the last recorded mileage ({car.milage}).")
         # Proceeding anyway, but this warns the user of a potential typo.
 
-    service_interval = _get_user_input_int("Enter the service interval (in miles): ")
-
-    if car.needs_maintenance(service_interval, current_mileage=current_mileage):
+    if car.needs_maintenance(service_type, current_mileage=current_mileage):
         print("The car needs maintenance.")
     else:
         print("The car does not need maintenance.")

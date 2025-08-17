@@ -1,5 +1,12 @@
 import datetime
 
+# Define standard service intervals (miles, days). A value of None means no limit.
+SERVICE_INTERVALS = {
+    "oil change": (5000, 180),
+    "tire rotation": (7500, 365),
+    "brake inspection": (12000, 365),
+    "timing belt": (100000, 2555) # ~7 years
+}
 class Car:
     def __init__(self, make, model, year, milage, vin):
         self.make = make
@@ -8,12 +15,6 @@ class Car:
         self.milage = milage
         self.vin = vin
         self.maintenance_logs = []
-
-    def add_milage(self, miles):
-        if miles > 0:
-            self.milage += miles
-        else:
-            raise ValueError("Miles must be positive")
 
     def log_maintenance(self, service_type, cost,milage=None, date=None):
         if date is None:
@@ -38,25 +39,39 @@ class Car:
     def get_maintenance_history(self):
         return sorted(self.maintenance_logs, key=lambda x: x['date'])
 
-    def needs_maintenance(self, service_interval, current_mileage=None):
-        if not self.maintenance_logs:
+    def needs_maintenance(self, service_type, current_mileage=None):
+        if service_type not in SERVICE_INTERVALS:
+            print(f"Warning: Unknown service type '{service_type}'. Cannot determine interval.")
+            return False
+
+        mile_interval, day_interval = SERVICE_INTERVALS[service_type]
+
+        # Find the last time this specific service was performed
+        relevant_logs = [log for log in self.maintenance_logs if log['service'].lower() == service_type.lower()]
+
+        if not relevant_logs:
+            print(f"No record of a '{service_type}' found.")
             return True
 
         # Use the provided current_mileage for the check, otherwise default to the car's last known mileage.
         effective_mileage = current_mileage if current_mileage is not None else self.milage
 
-        last_service = max(self.maintenance_logs, key=lambda x: x['date'])
+        last_service = max(relevant_logs, key=lambda x: x['date'])
 
-        # Check milage gap
-        milage_gap = effective_mileage - last_service['milage']
-        if milage_gap >= service_interval:
-            return True
+        # Check mileage gap if an interval is set
+        if mile_interval is not None:
+            milage_gap = effective_mileage - last_service['milage']
+            if milage_gap >= mile_interval:
+                print(f"Reason: Mileage since last '{service_type}' is {milage_gap} miles (Interval: {mile_interval}).")
+                return True
 
-        # Check time gap
-        last_service_date = datetime.datetime.strptime(last_service['date'], "%Y-%m-%d").date()
-        days_since_service = (datetime.date.today() - last_service_date).days
-        if days_since_service > 180:
-            return True
+        # Check time gap if an interval is set
+        if day_interval is not None:
+            last_service_date = datetime.datetime.strptime(last_service['date'], "%Y-%m-%d").date()
+            days_since_service = (datetime.date.today() - last_service_date).days
+            if days_since_service > day_interval:
+                print(f"Reason: It has been {days_since_service} days since last '{service_type}' (Interval: {day_interval}).")
+                return True
 
         return False
 
