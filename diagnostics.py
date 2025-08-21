@@ -1,0 +1,60 @@
+from ui_helpers import select_car
+
+def log_diagnostic_issue(cars_list):
+    """Logs a new diagnostic issue for a selected car."""
+    car = select_car(cars_list)
+    if not car:
+        return
+
+    print(f"\n--- Logging Diagnostic Issue for {car.make} {car.model} ---")
+    description = input("Enter a description of the issue (e.g., 'Check engine light on'): ")
+    code = input("Enter any diagnostic code, if available (e.g., 'P0420') or press Enter to skip: ")
+    
+    car.log_diagnostic(description, code=code if code else None)
+    print("\nDiagnostic issue logged successfully.")
+
+def view_and_resolve_diagnostics(cars_list):
+    """Displays diagnostic issues and allows the user to resolve them."""
+    car = select_car(cars_list)
+    if not car:
+        return
+
+    while True:
+        history = car.get_diagnostic_history()
+        open_issues = [log for log in history if log['status'] == 'open']
+        resolved_issues = [log for log in history if log['status'] == 'resolved']
+
+        print(f"\n--- Diagnostic History for {car.make} {car.model} ---")
+        if not history:
+            print("No diagnostic issues found for this car.")
+            return
+
+        if open_issues:
+            print("\n-- Open Issues --")
+            for i, log in enumerate(open_issues):
+                code_str = f" (Code: {log['code']})" if log['code'] else ""
+                print(f"  {i + 1}. [{log['date_logged']}] {log['description']}{code_str}")
+        else:
+            print("\n-- No Open Issues --")
+
+        if resolved_issues:
+            print("\n-- Resolved Issues --")
+            for log in resolved_issues:
+                code_str = f" (Code: {log['code']})" if log['code'] else ""
+                print(f"  - [{log['date_logged']}] {log['description']}{code_str}")
+                print(f"    Resolved on {log['resolved_date']}: {log['resolution']}")
+        print("\n-------------------------------------------------")
+
+        if not open_issues:
+            break
+
+        resolve_choice = input("Enter the number of an issue to resolve, or press Enter to return to the main menu: ")
+        if not resolve_choice:
+            break
+        try:
+            choice_index = int(resolve_choice) - 1
+            resolution = input(f"How was issue '{open_issues[choice_index]['description']}' resolved? ")
+            if car.resolve_diagnostic(choice_index, resolution):
+                print("Issue marked as resolved.")
+        except (ValueError, IndexError):
+            print("Invalid input. Please enter a valid issue number.")

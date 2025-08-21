@@ -15,6 +15,7 @@ class Car:
         self.milage = milage
         self.vin = vin
         self.maintenance_logs = []
+        self.diagnostic_logs = []
 
     def log_maintenance(self, service_type, cost,milage=None, date=None):
         if date is None:
@@ -36,8 +37,37 @@ class Car:
         if log_milage > self.milage:
             self.milage = log_milage
 
+    def log_diagnostic(self, description, code=None, date=None):
+        """Logs a new diagnostic issue."""
+        if date is None:
+            date = datetime.date.today().isoformat()
+
+        log = {
+            "description": description,
+            "code": code, # e.g., P0420
+            "date_logged": date,
+            "status": "open", # Can be 'open' or 'resolved'
+            "resolution": None,
+            "resolved_date": None
+        }
+        self.diagnostic_logs.append(log)
+
+    def resolve_diagnostic(self, issue_index, resolution_notes):
+        """Marks a diagnostic issue as resolved."""
+        open_issues = [log for log in self.diagnostic_logs if log['status'] == 'open']
+        if 0 <= issue_index < len(open_issues):
+            issue_to_resolve = open_issues[issue_index]
+            issue_to_resolve['status'] = 'resolved'
+            issue_to_resolve['resolution'] = resolution_notes
+            issue_to_resolve['resolved_date'] = datetime.date.today().isoformat()
+            return True
+        return False
+
     def get_maintenance_history(self):
         return sorted(self.maintenance_logs, key=lambda x: x['date'])
+
+    def get_diagnostic_history(self):
+        return sorted(self.diagnostic_logs, key=lambda x: x['date_logged'])
 
     def needs_maintenance(self, service_type, current_mileage=None):
         if service_type not in SERVICE_INTERVALS:
@@ -76,4 +106,6 @@ class Car:
         return False
 
     def __str__(self):
-        return f"{self.year} {self.make} {self.model} (VIN: {self.vin}, milage: {self.milage})"
+        open_issues = sum(1 for log in self.diagnostic_logs if log['status'] == 'open')
+        issue_str = f", {open_issues} open issues" if open_issues > 0 else ""
+        return f"{self.year} {self.make} {self.model} (VIN: {self.vin}, Mileage: {self.milage}{issue_str})"
