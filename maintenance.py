@@ -2,18 +2,22 @@ import datetime
 from car import SERVICE_INTERVALS
 from ui_helpers import get_user_input_int, select_car
 
+def display_service_history(car):
+    """Displays the maintenance history for a given car."""
+    history = car.get_maintenance_history()
+    if not history:
+        print("\nNo service history found for this car.")
+        return
+    print(f"\n--- Service History for {car.make} {car.model} ---")
+    for record in history:
+        print(f"  Date: {record['date']}, Service: {record['service']}, Mileage: {record['milage']}, Cost: ${record['cost']:.2f}")
+    print("-------------------------------------------------")
+
 def service_history(cars_list):
-    """Displays the maintenance history for a selected car."""
+    """Prompts user to select a car and displays its maintenance history."""
     car = select_car(cars_list)
     if car:
-        history = car.get_maintenance_history()
-        if not history:
-            print("No service history found for this car.")
-            return
-        print(f"\n--- Service History for {car.make} {car.model} ---")
-        for record in history:
-            print(f"  Date: {record['date']}, Service: {record['service']}, Mileage: {record['milage']}, Cost: ${record['cost']:.2f}")
-        print("-------------------------------------------------")
+        display_service_history(car)
 
 def add_service_record(cars_list):
     """Adds a new maintenance log to a selected car."""

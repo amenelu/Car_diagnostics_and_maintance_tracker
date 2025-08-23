@@ -13,12 +13,8 @@ def log_diagnostic_issue(cars_list):
     car.log_diagnostic(description, code=code if code else None)
     print("\nDiagnostic issue logged successfully.")
 
-def view_and_resolve_diagnostics(cars_list):
-    """Displays diagnostic issues and allows the user to resolve them."""
-    car = select_car(cars_list)
-    if not car:
-        return
-
+def manage_car_diagnostics(car):
+    """Displays diagnostic issues for a given car and allows resolving them."""
     while True:
         history = car.get_diagnostic_history()
         open_issues = [log for log in history if log['status'] == 'open']
@@ -58,3 +54,9 @@ def view_and_resolve_diagnostics(cars_list):
                 print("Issue marked as resolved.")
         except (ValueError, IndexError):
             print("Invalid input. Please enter a valid issue number.")
+
+def view_and_resolve_diagnostics(cars_list):
+    """Prompts user to select a car and manage its diagnostics."""
+    car = select_car(cars_list)
+    if car:
+        manage_car_diagnostics(car)

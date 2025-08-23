@@ -41,6 +41,43 @@ def add_car():
     data_manager.save_cars(cars)
     print("\nCar added successfully.")
 
+def search_for_car():
+    """Finds a car by VIN or license plate and shows a sub-menu."""
+    if not cars:
+        print("\nNo cars in the system to search.")
+        return
+
+    search_term = input("\nEnter VIN or License Plate to search: ").upper()
+    found_car = None
+    for car in cars:
+        if car.vin == search_term or car.license_plate == search_term:
+            found_car = car
+            break
+
+    if not found_car:
+        print(f"\nNo car found with VIN or License Plate '{search_term}'.")
+        return
+
+    print("\n--- Car Found ---")
+    print(found_car)
+    print("-----------------")
+
+    while True:
+        print("\nCar-Specific Menu:")
+        print("1. View service history")
+        print("2. View and resolve diagnostic issues")
+        print("3. Return to main menu")
+        choice = input("Enter your choice: ")
+
+        if choice == '1':
+            maintenance.display_service_history(found_car)
+        elif choice == '2':
+            diagnostics.manage_car_diagnostics(found_car)
+        elif choice == '3':
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
 def main():
     """Main application loop."""
     print(f"Welcome! {len(cars)} car(s) loaded from file.")
@@ -54,8 +91,9 @@ def main():
         print("\n--- Diagnostics ---")
         print("5. Log a diagnostic issue")
         print("6. View and resolve diagnostic issues")
+        print("7. Search for a car by VIN/Plate")
         print("\n-------------------")
-        print("7. Exit")
+        print("8. Exit")
 
         choice=input("Enter your choice:")
         if choice=="1":
@@ -74,10 +112,12 @@ def main():
             diagnostics.view_and_resolve_diagnostics(cars)
             data_manager.save_cars(cars)
         elif choice=="7":
+            search_for_car()
+        elif choice=="8":
             print("Exiting... Goodbye")
             break
         else:
-            print("Invalid choice. Please input a number between 1 and 7.")
+            print("Invalid choice. Please input a number between 1 and 8.")
 
 if __name__ == "__main__":
     main()
