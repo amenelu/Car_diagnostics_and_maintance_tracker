@@ -5,8 +5,10 @@ import datetime
 import maintenance
 import diagnostics
 from ui_helpers import get_user_input_int
+import data_manager
 
-cars=[]
+# Load existing cars from file at startup
+cars = data_manager.load_cars()
 
 def add_car():
     make=input("Enter the car make:")
@@ -27,10 +29,13 @@ def add_car():
 
     # add to the list
     cars.append(new_car)
+    # Save the updated list to the file
+    data_manager.save_cars(cars)
     print("\nCar added successfully.")
 
 def main():
     """Main application loop."""
+    print(f"Welcome! {len(cars)} car(s) loaded from file.")
     while True:
         print("\nCar Tracker Menu\n")
         print("--- Maintenance ---")
@@ -46,17 +51,20 @@ def main():
 
         choice=input("Enter your choice:")
         if choice=="1":
-            add_car()
+            add_car() # Saving is handled inside the add_car function
         elif choice=="2":
             maintenance.add_service_record(cars)
+            data_manager.save_cars(cars)
         elif choice=="3":
-            maintenance.service_history(cars)
+            maintenance.service_history(cars) # View-only, no save needed
         elif choice=="4":
-            maintenance.needs_service(cars)
+            maintenance.needs_service(cars) # View-only, no save needed
         elif choice=="5":
             diagnostics.log_diagnostic_issue(cars)
+            data_manager.save_cars(cars)
         elif choice=="6":
             diagnostics.view_and_resolve_diagnostics(cars)
+            data_manager.save_cars(cars)
         elif choice=="7":
             print("Exiting... Goodbye")
             break
