@@ -4,7 +4,7 @@ import datetime
 # Import the new modules
 import maintenance
 import diagnostics
-from ui_helpers import get_user_input_int
+import ui_helpers
 import data_manager
 
 # Load existing cars from file at startup
@@ -14,8 +14,8 @@ def add_car():
     make=input("Enter the car make:")
     model=input("Enter the car model:")
     current_year = datetime.date.today().year
-    year=get_user_input_int(f"Enter the car year (1900-{current_year+1}): ", min_val=1900, max_val=current_year + 1)
-    milage=get_user_input_int("Enter the car mileage: ", min_val=0)
+    year=ui_helpers.get_user_input_int(f"Enter the car year (1900-{current_year+1}): ", min_val=1900, max_val=current_year + 1)
+    milage=ui_helpers.get_user_input_int("Enter the car mileage: ", min_val=0)
     
     while True:
         vin=input("Enter the car VIN:").upper() # Standardize to uppercase
@@ -78,6 +78,63 @@ def search_for_car():
         else:
             print("Invalid choice. Please try again.")
 
+def edit_car():
+    """Selects a car and allows editing its details."""
+    print("\n--- Edit Car Details ---")
+    car_to_edit = ui_helpers.select_car(cars)
+    if not car_to_edit:
+        return
+
+    while True:
+        print(f"\nCurrently editing: {car_to_edit}")
+        print("\nWhat would you like to edit?")
+        print("1. Mileage")
+        print("2. License Plate")
+        print("3. Return to main menu")
+
+        choice = input("Enter your choice: ")
+
+        if choice == '1':
+            new_mileage = ui_helpers.get_user_input_int(
+                f"Enter new mileage (current: {car_to_edit.milage}): ",
+                min_val=car_to_edit.milage
+            )
+            car_to_edit.milage = new_mileage
+            print("Mileage updated successfully.")
+            data_manager.save_cars(cars)
+        elif choice == '2':
+            while True:
+                new_plate = input("Enter new license plate: ").upper()
+                if any(c.license_plate == new_plate and c.vin != car_to_edit.vin for c in cars):
+                    print(f"Error: License plate '{new_plate}' is already in use by another car.")
+                else:
+                    car_to_edit.license_plate = new_plate
+                    print("License plate updated successfully.")
+                    data_manager.save_cars(cars)
+                    break
+        elif choice == '3':
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+def delete_car():
+    """Selects a car and permanently deletes it from the system."""
+    print("\n--- Delete a Car ---")
+    car_to_delete = ui_helpers.select_car(cars)
+    if not car_to_delete:
+        return
+
+    # Confirmation step to prevent accidental deletion
+    print(f"\nYou have selected: {car_to_delete}")
+    confirm = input("Are you sure you want to PERMANENTLY delete this car? This cannot be undone. (yes/no): ").lower()
+
+    if confirm == 'yes':
+        cars.remove(car_to_delete)
+        data_manager.save_cars(cars)
+        print("Car has been successfully deleted.")
+    else:
+        print("Deletion cancelled.")
+
 def main():
     """Main application loop."""
     print(f"Welcome! {len(cars)} car(s) loaded from file.")
@@ -85,39 +142,45 @@ def main():
         print("\nCar Tracker Menu\n")
         print("--- Maintenance ---")
         print("1. Add a new car")
-        print("2. Add service record to a car")
-        print("3. View a car's service history")
-        print("4. Check if a car is due for service")
+        print("2. Edit a car's details")
+        print("3. Delete a car")
+        print("4. Add service record to a car")
+        print("5. View a car's service history")
+        print("6. Check if a car is due for service")
         print("\n--- Diagnostics ---")
-        print("5. Log a diagnostic issue")
-        print("6. View and resolve diagnostic issues")
-        print("7. Search for a car by VIN/Plate")
+        print("7. Log a diagnostic issue")
+        print("8. View and resolve diagnostic issues")
+        print("9. Search for a car by VIN/Plate")
         print("\n-------------------")
-        print("8. Exit")
+        print("10. Exit")
 
         choice=input("Enter your choice:")
         if choice=="1":
             add_car() # Saving is handled inside the add_car function
         elif choice=="2":
+            edit_car()
+        elif choice=="3":
+            delete_car()
+        elif choice=="4":
             maintenance.add_service_record(cars)
             data_manager.save_cars(cars)
-        elif choice=="3":
-            maintenance.service_history(cars) # View-only, no save needed
-        elif choice=="4":
-            maintenance.needs_service(cars) # View-only, no save needed
         elif choice=="5":
+            maintenance.service_history(cars) # View-only, no save needed
+        elif choice=="6":
+            maintenance.needs_service(cars) # View-only, no save needed
+        elif choice=="7":
             diagnostics.log_diagnostic_issue(cars)
             data_manager.save_cars(cars)
-        elif choice=="6":
+        elif choice=="8":
             diagnostics.view_and_resolve_diagnostics(cars)
             data_manager.save_cars(cars)
-        elif choice=="7":
+        elif choice=="9":
             search_for_car()
-        elif choice=="8":
+        elif choice=="10":
             print("Exiting... Goodbye")
             break
         else:
-            print("Invalid choice. Please input a number between 1 and 8.")
+            print("Invalid choice. Please input a number between 1 and 10.")
 
 if __name__ == "__main__":
     main()
