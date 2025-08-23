@@ -25,7 +25,15 @@ def add_car():
         else:
             break
 
-    new_car=Car(make,model,year,milage,vin)
+    while True:
+        license_plate = input("Enter the license plate: ").upper()
+        # Check if a car with this license plate already exists
+        if any(car.license_plate == license_plate for car in cars):
+            print(f"A car with license plate {license_plate} already exists. Please enter a unique license plate.")
+        else:
+            break
+
+    new_car=Car(make,model,year,milage,vin, license_plate)
 
     # add to the list
     cars.append(new_car)

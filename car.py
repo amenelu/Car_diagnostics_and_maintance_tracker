@@ -8,12 +8,13 @@ SERVICE_INTERVALS = {
     "timing belt": (100000, 2555) # ~7 years
 }
 class Car:
-    def __init__(self, make, model, year, milage, vin):
+    def __init__(self, make, model, year, milage, vin, license_plate):
         self.make = make
         self.model = model
         self.year = year
         self.milage = milage
         self.vin = vin
+        self.license_plate = license_plate
         self.maintenance_logs = []
         self.diagnostic_logs = []
 
@@ -108,7 +109,7 @@ class Car:
     def __str__(self):
         open_issues = sum(1 for log in self.diagnostic_logs if log['status'] == 'open')
         issue_str = f", {open_issues} open issues" if open_issues > 0 else ""
-        return f"{self.year} {self.make} {self.model} (VIN: {self.vin}, Mileage: {self.milage}{issue_str})"
+        return f"{self.year} {self.make} {self.model} (Plate: {self.license_plate}, VIN: {self.vin}, Mileage: {self.milage}{issue_str})"
 
     def to_dict(self):  
         """Converts the Car object to a dictionary for JSON serialization."""
@@ -118,6 +119,7 @@ class Car:
             "year": self.year,
             "milage": self.milage,
             "vin": self.vin,
+            "license_plate": self.license_plate,
             "maintenance_logs": self.maintenance_logs,
             "diagnostic_logs": self.diagnostic_logs,
         }
@@ -126,7 +128,12 @@ class Car:
     def from_dict(cls, data):
         """Creates a Car object from a dictionary."""
         car = cls(
-            make=data["make"], model=data["model"], year=data["year"], milage=data["milage"], vin=data["vin"]
+            make=data["make"],
+            model=data["model"],
+            year=data["year"],
+            milage=data["milage"],
+            vin=data["vin"],
+            license_plate=data.get("license_plate", "N/A") # For backward compatibility
         )
         car.maintenance_logs = data.get("maintenance_logs", [])
         car.diagnostic_logs = data.get("diagnostic_logs", [])
