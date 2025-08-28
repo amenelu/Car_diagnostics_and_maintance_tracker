@@ -110,6 +110,18 @@ class Car:
 
         return False
 
+    def get_upcoming_services(self, current_mileage=None):
+        """
+        Checks all known service types and returns a list of those that are due.
+        An optional current_mileage can be provided for a more accurate check.
+        """
+        due_services = []
+        for service_type in SERVICE_INTERVALS.keys():
+            # Call needs_maintenance, passing through current_mileage, but always non-verbose
+            if self.needs_maintenance(service_type, current_mileage=current_mileage, verbose=False):
+                due_services.append(service_type)
+        return due_services
+
     def __str__(self):
         open_issues = sum(1 for log in self.diagnostic_logs if log['status'] == 'open')
         issue_str = f", {open_issues} open issues" if open_issues > 0 else ""
