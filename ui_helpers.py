@@ -1,10 +1,13 @@
 import datetime
 
-def get_user_input_int(prompt, min_val=None, max_val=None):
+def get_user_input_int(prompt, min_val=None, max_val=None, allow_empty=False):
     """Helper function to get a valid integer from the user within an optional range."""
     while True:
         try:
-            value = int(input(prompt))
+            value_str = input(prompt)
+            if allow_empty and not value_str:
+                return None
+            value = int(value_str)
             if min_val is not None and value < min_val:
                 print(f"Input must be at least {min_val}.")
                 continue

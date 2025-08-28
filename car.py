@@ -70,9 +70,10 @@ class Car:
     def get_diagnostic_history(self):
         return sorted(self.diagnostic_logs, key=lambda x: x['date_logged'])
 
-    def needs_maintenance(self, service_type, current_mileage=None):
+    def needs_maintenance(self, service_type, current_mileage=None, verbose=True):
         if service_type not in SERVICE_INTERVALS:
-            print(f"Warning: Unknown service type '{service_type}'. Cannot determine interval.")
+            if verbose:
+                print(f"Warning: Unknown service type '{service_type}'. Cannot determine interval.")
             return False
 
         mile_interval, day_interval = SERVICE_INTERVALS[service_type]
@@ -81,7 +82,8 @@ class Car:
         relevant_logs = [log for log in self.maintenance_logs if log['service'].lower() == service_type.lower()]
 
         if not relevant_logs:
-            print(f"No record of a '{service_type}' found.")
+            if verbose:
+                print(f"No record of a '{service_type}' found.")
             return True
 
         # Use the provided current_mileage for the check, otherwise default to the car's last known mileage.
@@ -93,15 +95,17 @@ class Car:
         if mile_interval is not None:
             milage_gap = effective_mileage - last_service['milage']
             if milage_gap >= mile_interval:
-                print(f"Reason: Mileage since last '{service_type}' is {milage_gap} miles (Interval: {mile_interval}).")
+                if verbose:
+                    print(f"Reason: Mileage since last '{service_type}' is {milage_gap} miles (Interval: {mile_interval}).")
                 return True
 
         # Check time gap if an interval is set
         if day_interval is not None:
             last_service_date = datetime.datetime.strptime(last_service['date'], "%Y-%m-%d").date()
             days_since_service = (datetime.date.today() - last_service_date).days
-            if days_since_service > day_interval:
-                print(f"Reason: It has been {days_since_service} days since last '{service_type}' (Interval: {day_interval}).")
+            if days_since_service >= day_interval:
+                if verbose:
+                    print(f"Reason: It has been {days_since_service} days since last '{service_type}' (Interval: {day_interval}).")
                 return True
 
         return False

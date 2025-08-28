@@ -5,6 +5,7 @@ import datetime
 import maintenance
 import diagnostics
 import ui_helpers
+import search_filter
 import data_manager
 
 # Load existing cars from file at startup
@@ -150,11 +151,13 @@ def main():
         print("\n--- Diagnostics ---")
         print("7. Log a diagnostic issue")
         print("8. View and resolve diagnostic issues")
-        print("9. Search for a car by VIN/Plate")
+        print("\n--- Search & View ---")
+        print("9. Find a specific car (VIN/Plate)")
+        print("10. Filter car list by criteria")
         print("\n-------------------")
-        print("10. Exit")
+        print("11. Exit")
 
-        choice=input("Enter your choice:")
+        choice=input("Enter your choice: ")
         if choice=="1":
             add_car() # Saving is handled inside the add_car function
         elif choice=="2":
@@ -176,11 +179,13 @@ def main():
             data_manager.save_cars(cars)
         elif choice=="9":
             search_for_car()
-        elif choice=="10":
+        elif choice == "10":
+            search_filter.search_and_filter_cars(cars)
+        elif choice=="11":
             print("Exiting... Goodbye")
             break
         else:
-            print("Invalid choice. Please input a number between 1 and 10.")
+            print("Invalid choice. Please input a number between 1 and 11.")
 
 if __name__ == "__main__":
     main()

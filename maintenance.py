@@ -4,7 +4,7 @@ from ui_helpers import get_user_input_int, select_car
 
 def display_service_history(car):
     """Displays the maintenance history for a given car."""
-    history = car.get_maintenance_history()
+    history = car.get_maint enance_history()
     if not history:
         print("\nNo service history found for this car.")
         return
@@ -64,7 +64,7 @@ def needs_service(cars_list):
     print(f"Known services: {', '.join(SERVICE_INTERVALS.keys())}")
     service_type = input("Enter the service type: ").lower()
     current_mileage = get_user_input_int(f"Enter the car's current mileage (last known: {car.milage}): ", min_val=0)
-    if car.needs_maintenance(service_type, current_mileage=current_mileage):
+    if car.needs_maintenance(service_type, current_mileage=current_mileage, verbose=True):
         print(f"\nYES, the car is due for a '{service_type}'.")
     else:
         print(f"\nNO, the car is not yet due for a '{service_type}'.")
