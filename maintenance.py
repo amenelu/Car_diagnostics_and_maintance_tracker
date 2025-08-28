@@ -68,3 +68,30 @@ def needs_service(cars_list):
         print(f"\nYES, the car is due for a '{service_type}'.")
     else:
         print(f"\nNO, the car is not yet due for a '{service_type}'.")
+
+def view_service_reminders(cars_list):
+    """Scans all cars and reports any upcoming or due services."""
+    print("\n--- Scanning for Service Reminders ---")
+    if not cars_list:
+        print("No cars in the system to check.")
+        return
+
+    reminders_found = False
+    for car in cars_list:
+        # For a general overview, we check against the car's last known mileage.
+        # The user can get a more precise check via the "Check if a car is due for service" option.
+        due_services = car.get_upcoming_services() # Uses car.milage by default inside needs_maintenance
+        if due_services:
+            if not reminders_found:
+                # Print a header only if we find at least one reminder
+                print("The following cars are due for service:")
+                reminders_found = True
+            
+            print(f"\n  -> {car.year} {car.make} {car.model} (Plate: {car.license_plate}, Mileage: {car.milage})")
+            for service in due_services:
+                print(f"     - Needs: {service.title()}")
+
+    if not reminders_found:
+        print("\nAll cars are up-to-date with their service schedules.")
+    
+    print("--------------------------------------")

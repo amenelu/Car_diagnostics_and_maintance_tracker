@@ -148,14 +148,15 @@ def main():
         print("4. Add service record to a car")
         print("5. View a car's service history")
         print("6. Check if a car is due for service")
+        print("7. View All Service Reminders")
         print("\n--- Diagnostics ---")
-        print("7. Log a diagnostic issue")
-        print("8. View and resolve diagnostic issues")
+        print("8. Log a diagnostic issue")
+        print("9. View and resolve diagnostic issues")
         print("\n--- Search & View ---")
-        print("9. Find a specific car (VIN/Plate)")
-        print("10. Filter car list by criteria")
+        print("10. Find a specific car (VIN/Plate)")
+        print("11. Filter car list by criteria")
         print("\n-------------------")
-        print("11. Exit")
+        print("12. Exit")
 
         choice=input("Enter your choice: ")
         if choice=="1":
@@ -171,21 +172,23 @@ def main():
             maintenance.service_history(cars) # View-only, no save needed
         elif choice=="6":
             maintenance.needs_service(cars) # View-only, no save needed
-        elif choice=="7":
+        elif choice == "7":
+            maintenance.view_service_reminders(cars)
+        elif choice=="8":
             diagnostics.log_diagnostic_issue(cars)
             data_manager.save_cars(cars)
-        elif choice=="8":
+        elif choice=="9":
             diagnostics.view_and_resolve_diagnostics(cars)
             data_manager.save_cars(cars)
-        elif choice=="9":
+        elif choice=="10":
             search_for_car()
-        elif choice == "10":
+        elif choice == "11":
             search_filter.search_and_filter_cars(cars)
-        elif choice=="11":
+        elif choice=="12":
             print("Exiting... Goodbye")
             break
         else:
-            print("Invalid choice. Please input a number between 1 and 11.")
+            print("Invalid choice. Please input a number between 1 and 12.")
 
 if __name__ == "__main__":
     main()
