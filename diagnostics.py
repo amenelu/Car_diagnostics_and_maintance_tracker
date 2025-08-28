@@ -4,7 +4,7 @@ def log_diagnostic_issue(cars_list):
     """Logs a new diagnostic issue for a selected car."""
     car = select_car(cars_list)
     if not car:
-        return
+give        return False
 
     print(f"\n--- Logging Diagnostic Issue for {car.make} {car.model} ---")
     description = input("Enter a description of the issue (e.g., 'Check engine light on'): ")
@@ -12,9 +12,11 @@ def log_diagnostic_issue(cars_list):
     
     car.log_diagnostic(description, code=code if code else None)
     print("\nDiagnostic issue logged successfully.")
+    return True
 
 def manage_car_diagnostics(car):
     """Displays diagnostic issues for a given car and allows resolving them."""
+    made_change = False
     while True:
         history = car.get_diagnostic_history()
         open_issues = [log for log in history if log['status'] == 'open']
@@ -23,7 +25,7 @@ def manage_car_diagnostics(car):
         print(f"\n--- Diagnostic History for {car.make} {car.model} ---")
         if not history:
             print("No diagnostic issues found for this car.")
-            return
+            return made_change
 
         if open_issues:
             print("\n-- Open Issues --")
@@ -52,11 +54,14 @@ def manage_car_diagnostics(car):
             resolution = input(f"How was issue '{open_issues[choice_index]['description']}' resolved? ")
             if car.resolve_diagnostic(choice_index, resolution):
                 print("Issue marked as resolved.")
+                made_change = True
         except (ValueError, IndexError):
             print("Invalid input. Please enter a valid issue number.")
+    return made_change
 
 def view_and_resolve_diagnostics(cars_list):
     """Prompts user to select a car and manage its diagnostics."""
     car = select_car(cars_list)
     if car:
-        manage_car_diagnostics(car)
+        return manage_car_diagnostics(car)
+    return False

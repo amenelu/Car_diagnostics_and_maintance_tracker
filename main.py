@@ -7,9 +7,11 @@ import diagnostics
 import ui_helpers
 import search_filter
 import data_manager
+from history_manager import HistoryManager
 
 # Load existing cars from file at startup
 cars = data_manager.load_cars()
+history = HistoryManager()
 
 def add_car():
     make=input("Enter the car make:")
@@ -38,9 +40,8 @@ def add_car():
 
     # add to the list
     cars.append(new_car)
-    # Save the updated list to the file
-    data_manager.save_cars(cars)
     print("\nCar added successfully.")
+    return True
 
 def search_for_car():
     """Finds a car by VIN or license plate and shows a sub-menu."""
@@ -84,8 +85,9 @@ def edit_car():
     print("\n--- Edit Car Details ---")
     car_to_edit = ui_helpers.select_car(cars)
     if not car_to_edit:
-        return
+        return False
 
+    made_change = False
     while True:
         print(f"\nCurrently editing: {car_to_edit}")
         print("\nWhat would you like to edit?")
@@ -101,8 +103,8 @@ def edit_car():
                 min_val=car_to_edit.milage
             )
             car_to_edit.milage = new_mileage
+            made_change = True
             print("Mileage updated successfully.")
-            data_manager.save_cars(cars)
         elif choice == '2':
             while True:
                 new_plate = input("Enter new license plate: ").upper()
@@ -110,20 +112,21 @@ def edit_car():
                     print(f"Error: License plate '{new_plate}' is already in use by another car.")
                 else:
                     car_to_edit.license_plate = new_plate
+                    made_change = True
                     print("License plate updated successfully.")
-                    data_manager.save_cars(cars)
                     break
         elif choice == '3':
             break
         else:
             print("Invalid choice. Please try again.")
+    return made_change
 
 def delete_car():
     """Selects a car and permanently deletes it from the system."""
     print("\n--- Delete a Car ---")
     car_to_delete = ui_helpers.select_car(cars)
     if not car_to_delete:
-        return
+        return False
 
     # Confirmation step to prevent accidental deletion
     print(f"\nYou have selected: {car_to_delete}")
@@ -131,13 +134,15 @@ def delete_car():
 
     if confirm == 'yes':
         cars.remove(car_to_delete)
-        data_manager.save_cars(cars)
         print("Car has been successfully deleted.")
+        return True
     else:
         print("Deletion cancelled.")
+        return False
 
 def main():
     """Main application loop."""
+    global cars
     print(f"Welcome! {len(cars)} car(s) loaded from file.")
     while True:
         print("\nCar Tracker Menu\n")
@@ -155,40 +160,66 @@ def main():
         print("\n--- Search & View ---")
         print("10. Find a specific car (VIN/Plate)")
         print("11. Filter car list by criteria")
+        print("\n--- History ---")
+        print("12. Undo last action")
+        print("13. Redo last action")
         print("\n-------------------")
-        print("12. Exit")
+        print("14. Exit")
 
         choice=input("Enter your choice: ")
-        if choice=="1":
-            add_car() # Saving is handled inside the add_car function
-        elif choice=="2":
-            edit_car()
-        elif choice=="3":
-            delete_car()
-        elif choice=="4":
-            maintenance.add_service_record(cars)
-            data_manager.save_cars(cars)
-        elif choice=="5":
+
+        # Actions that don't modify state
+        if choice=="5":
             maintenance.service_history(cars) # View-only, no save needed
         elif choice=="6":
             maintenance.needs_service(cars) # View-only, no save needed
         elif choice == "7":
             maintenance.view_service_reminders(cars)
-        elif choice=="8":
-            diagnostics.log_diagnostic_issue(cars)
-            data_manager.save_cars(cars)
-        elif choice=="9":
-            diagnostics.view_and_resolve_diagnostics(cars)
-            data_manager.save_cars(cars)
         elif choice=="10":
             search_for_car()
         elif choice == "11":
             search_filter.search_and_filter_cars(cars)
-        elif choice=="12":
+        elif choice=="14":
             print("Exiting... Goodbye")
             break
+        
+        # Actions that modify state
+        elif choice in ["1", "2", "3", "4", "8", "9"]:
+            history.record_state(cars)
+            changed = False
+            if choice == "1":
+                changed = add_car()
+            elif choice == "2":
+                changed = edit_car()
+            elif choice == "3":
+                changed = delete_car()
+            elif choice == "4":
+                changed = maintenance.add_service_record(cars)
+            elif choice == "8":
+                changed = diagnostics.log_diagnostic_issue(cars)
+            elif choice == "9":
+                changed = diagnostics.view_and_resolve_diagnostics(cars)
+
+            if changed:
+                data_manager.save_cars(cars)
+            else:
+                history.discard_last_record()
+        
+        # Undo/Redo
+        elif choice == "12":
+            new_cars_state = history.undo(cars)
+            if new_cars_state is not None:
+                cars = new_cars_state
+                data_manager.save_cars(cars)
+                print("Undo successful.")
+        elif choice == "13":
+            new_cars_state = history.redo(cars)
+            if new_cars_state is not None:
+                cars = new_cars_state
+                data_manager.save_cars(cars)
+                print("Redo successful.")
         else:
-            print("Invalid choice. Please input a number between 1 and 12.")
+            print("Invalid choice. Please input a number between 1 and 14.")
 
 if __name__ == "__main__":
     main()

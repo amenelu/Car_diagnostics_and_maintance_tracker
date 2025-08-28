@@ -23,7 +23,7 @@ def add_service_record(cars_list):
     """Adds a new maintenance log to a selected car."""
     car = select_car(cars_list)
     if not car:
-        return
+        return False
 
     service_type = input("Enter the service type: ")
     milage = get_user_input_int("Enter the service mileage: ", min_val=0)
@@ -53,6 +53,7 @@ def add_service_record(cars_list):
 
     car.log_maintenance(service_type, cost, milage=milage, date=date.isoformat())
     print("\nService record added successfully.")
+    return True
 
 def needs_service(cars_list):
     """Checks if a selected car is due for a specific maintenance service."""
