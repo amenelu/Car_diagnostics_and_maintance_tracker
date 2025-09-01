@@ -1,4 +1,5 @@
 from ui_helpers import select_car
+import database as db
 
 def log_diagnostic_issue(cars_list):
     """Logs a new diagnostic issue for a selected car."""
@@ -10,7 +11,8 @@ give        return False
     description = input("Enter a description of the issue (e.g., 'Check engine light on'): ")
     code = input("Enter any diagnostic code, if available (e.g., 'P0420') or press Enter to skip: ")
     
-    car.log_diagnostic(description, code=code if code else None)
+    new_log = car.log_diagnostic(description, code=code if code else None)
+    db.add_diagnostic_log(car.id, new_log)
     print("\nDiagnostic issue logged successfully.")
     return True
 
@@ -52,8 +54,10 @@ def manage_car_diagnostics(car):
         try:
             choice_index = int(resolve_choice) - 1
             resolution = input(f"How was issue '{open_issues[choice_index]['description']}' resolved? ")
-            if car.resolve_diagnostic(choice_index, resolution):
+            resolved_log = car.resolve_diagnostic(choice_index, resolution)
+            if resolved_log:
                 print("Issue marked as resolved.")
+                db.resolve_diagnostic_log(car.id, resolved_log)
                 made_change = True
         except (ValueError, IndexError):
             print("Invalid input. Please enter a valid issue number.")

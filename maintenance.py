@@ -1,5 +1,6 @@
 import datetime
 from car import SERVICE_INTERVALS
+import database as db
 from ui_helpers import get_user_input_int, select_car
 
 def display_service_history(car):
@@ -51,7 +52,8 @@ def add_service_record(cars_list):
             except ValueError:
                 print("Invalid date format. Please use YYYY-MM-DD.")
 
-    car.log_maintenance(service_type, cost, milage=milage, date=date.isoformat())
+    new_log = car.log_maintenance(service_type, cost, milage=milage, date=date.isoformat())
+    db.add_maintenance_log(car.id, new_log)
     print("\nService record added successfully.")
     return True
 

@@ -8,8 +8,9 @@ SERVICE_INTERVALS = {
     "timing belt": (100000, 2555) # ~7 years
 }
 class Car:
-    def __init__(self, make, model, year, milage, vin, license_plate):
+    def __init__(self, make, model, year, milage, vin, license_plate, id=None):
         self.make = make
+        self.id = id
         self.model = model
         self.year = year
         self.milage = milage
@@ -37,6 +38,7 @@ class Car:
         # Also update the car's primary mileage if this service record's mileage is higher
         if log_milage > self.milage:
             self.milage = log_milage
+        return log
 
     def log_diagnostic(self, description, code=None, date=None):
         """Logs a new diagnostic issue."""
@@ -52,6 +54,7 @@ class Car:
             "resolved_date": None
         }
         self.diagnostic_logs.append(log)
+        return log
 
     def resolve_diagnostic(self, issue_index, resolution_notes):
         """Marks a diagnostic issue as resolved."""
@@ -61,8 +64,8 @@ class Car:
             issue_to_resolve['status'] = 'resolved'
             issue_to_resolve['resolution'] = resolution_notes
             issue_to_resolve['resolved_date'] = datetime.date.today().isoformat()
-            return True
-        return False
+            return issue_to_resolve
+        return None
 
     def get_maintenance_history(self):
         return sorted(self.maintenance_logs, key=lambda x: x['date'])
@@ -130,6 +133,7 @@ class Car:
     def to_dict(self):  
         """Converts the Car object to a dictionary for JSON serialization."""
         return {
+            "id": self.id,
             "make": self.make,
             "model": self.model,
             "year": self.year,
@@ -144,6 +148,7 @@ class Car:
     def from_dict(cls, data):
         """Creates a Car object from a dictionary."""
         car = cls(
+            id=data.get("id"),
             make=data["make"],
             model=data["model"],
             year=data["year"],
@@ -151,6 +156,7 @@ class Car:
             vin=data["vin"],
             license_plate=data.get("license_plate", "N/A") # For backward compatibility
         )
-        car.maintenance_logs = data.get("maintenance_logs", [])
-        car.diagnostic_logs = data.get("diagnostic_logs", [])
+        # Logs will be populated by the loader function, so we just initialize here.
+        car.maintenance_logs = data.get("maintenance_logs", []) 
+        car.diagnostic_logs = data.get("diagnostic_logs", []) 
         return car

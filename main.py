@@ -6,11 +6,12 @@ import maintenance
 import diagnostics
 import ui_helpers
 import search_filter
-import data_manager
+import database as db
 from history_manager import HistoryManager
 
 # Load existing cars from file at startup
-cars = data_manager.load_cars()
+db.init_db() # Ensure DB and tables exist
+cars = db.load_all_cars()
 history = HistoryManager()
 
 def add_car():
@@ -40,7 +41,8 @@ def add_car():
 
     # add to the list
     cars.append(new_car)
-    print("\nCar added successfully.")
+    db.add_car(new_car) # Save to DB and get ID assigned to the object
+    print(f"\nCar '{new_car.make} {new_car.model}' added successfully.")
     return True
 
 def search_for_car():
@@ -106,6 +108,7 @@ def edit_car():
                 min_val=car_to_edit.milage
             )
             car_to_edit.milage = new_mileage
+            db.update_car_details(car_to_edit)
             made_change = True
             print("Mileage updated successfully.")
         elif choice == '2':
@@ -115,6 +118,7 @@ def edit_car():
                     print(f"Error: License plate '{new_plate}' is already in use by another car.")
                 else:
                     car_to_edit.license_plate = new_plate
+                    db.update_car_details(car_to_edit)
                     made_change = True
                     print("License plate updated successfully.")
                     break
@@ -133,10 +137,11 @@ def delete_car():
 
     # Confirmation step to prevent accidental deletion
     print(f"\nYou have selected: {car_to_delete}")
-    confirm = input("Are you sure you want to PERMANENTLY delete this car? This cannot be undone. (yes/no): ").lower()
+    confirm = input("Are you sure you want to PERMANENTLY delete this car? (yes/no): ").lower()
 
     if confirm == 'yes':
         cars.remove(car_to_delete)
+        db.delete_car_by_id(car_to_delete.id)
         print("Car has been successfully deleted.")
         return True
     else:
@@ -203,23 +208,21 @@ def main():
             elif choice == "9":
                 changed = diagnostics.view_and_resolve_diagnostics(cars)
 
-            if changed:
-                data_manager.save_cars(cars)
-            else:
+            if not changed:
                 history.discard_last_record()
         
         # Undo/Redo
         elif choice == "12":
             new_cars_state = history.undo(cars)
             if new_cars_state is not None:
-                cars = new_cars_state
-                data_manager.save_cars(cars)
+                db.reset_database([c.to_dict() for c in new_cars_state])
+                cars = db.load_all_cars() # Reload from DB to ensure consistency
                 print("Undo successful.")
         elif choice == "13":
             new_cars_state = history.redo(cars)
             if new_cars_state is not None:
-                cars = new_cars_state
-                data_manager.save_cars(cars)
+                db.reset_database([c.to_dict() for c in new_cars_state])
+                cars = db.load_all_cars() # Reload from DB to ensure consistency
                 print("Redo successful.")
         else:
             print("Invalid choice. Please input a number between 1 and 14.")
