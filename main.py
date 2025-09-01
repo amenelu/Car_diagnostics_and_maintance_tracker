@@ -68,7 +68,8 @@ def search_for_car():
         print("\nCar-Specific Menu:")
         print("1. View service history")
         print("2. View and resolve diagnostic issues")
-        print("3. Return to main menu")
+        print("3. Generate Summary Report")
+        print("4. Return to main menu")
         choice = input("Enter your choice: ")
 
         if choice == '1':
@@ -76,6 +77,8 @@ def search_for_car():
         elif choice == '2':
             diagnostics.manage_car_diagnostics(found_car)
         elif choice == '3':
+            maintenance.generate_car_summary_report(found_car)
+        elif choice == '4':
             break
         else:
             print("Invalid choice. Please try again.")

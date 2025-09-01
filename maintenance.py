@@ -4,7 +4,7 @@ from ui_helpers import get_user_input_int, select_car
 
 def display_service_history(car):
     """Displays the maintenance history for a given car."""
-    history = car.get_maint enance_history()
+    history = car.get_maintenance_history()
     if not history:
         print("\nNo service history found for this car.")
         return
@@ -96,3 +96,30 @@ def view_service_reminders(cars_list):
         print("\nAll cars are up-to-date with their service schedules.")
     
     print("--------------------------------------")
+
+def generate_car_summary_report(car):
+    """Generates and displays a full summary report for a single car."""
+    print(f"\n--- Summary Report for {car.make} {car.model} ---")
+    print(f"  {car}") # Uses the car's __str__ method for main details
+    print("-------------------------------------------------")
+
+    # --- Open Diagnostic Issues ---
+    print("\n  Open Diagnostic Issues:")
+    open_issues = [log for log in car.diagnostic_logs if log['status'] == 'open']
+    if not open_issues:
+        print("    - No open diagnostic issues found.")
+    else:
+        for issue in open_issues:
+            code_str = f" (Code: {issue['code']})" if issue['code'] else ""
+            print(f"    - [{issue['date_logged']}] {issue['description']}{code_str}")
+
+    # --- Upcoming Maintenance ---
+    print("\n  Upcoming/Due Services:")
+    due_services = car.get_upcoming_services()
+    if not due_services:
+        print("    - All services are up-to-date.")
+    else:
+        for service in due_services:
+            print(f"    - {service.title()}")
+    
+    print("\n----------------- End of Report -----------------")
