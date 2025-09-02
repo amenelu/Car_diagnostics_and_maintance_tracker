@@ -6,30 +6,111 @@
         <a href="{{ url_for('add_car') }}" class="button">Add New Car</a>
     </div>
 
-    {% if cars %}
-    <table class="car-list">
-        <thead>
-            <tr>
-                <th>Car</th>
-                <th>Year</th>
-                <th>Mileage</th>
-                <th>License Plate</th>
-                <th>VIN</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for car in cars %}
-            <tr onclick="window.location='{{ url_for('car_detail', car_id=car.id) }}';">
-                <td>{{ car.make }} {{ car.model }}</td>
-                <td>{{ car.year }}</td>
-                <td>{{ "{:,}".format(car.milage) }}</td>
-                <td>{{ car.license_plate }}</td>
-                <td>{{ car.vin }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>No cars found in the system. <a href="{{ url_for('add_car') }}">Add one now!</a></p>
-    {% endif %}
+    <form method="get" action="{{ url_for('index') }}" class="filter-form card">
+        <h3>Filter Cars</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="make">Make</label>
+                <input type="text" name="make" id="make" value="{{ filters.make or '' }}" placeholder="e.g., Toyota">
+            </div>
+            <div class="form-group">
+                <label for="model">Model</label>
+                <input type="text" name="model" id="model" value="{{ filters.model or '' }}" placeholder="e.g., Camry">
+            </div>
+            <div class="form-group">
+                <label for="min_year">Min Year</label>
+                <input type="number" name="min_year" id="min_year" value="{{ filters.min_year or '' }}" placeholder="e.g., 2018">
+            </div>
+            <div class="form-group">
+                <label for="max_year">Max Year</label>
+                <input type="number" name="max_year" id="max_year" value="{{ filters.max_year or '' }}" placeholder="e.g., 2022">
+            </div>
+            <div class="form-group">
+                <label for="max_mileage">Max Mileage</label>
+                <input type="number" name="max_mileage" id="max_mileage" value="{{ filters.max_mileage or '' }}" placeholder="e.g., 60000">
+            </div>
+            <div class="form-group">
+                <label for="needs_service_type">Needs Service</label>
+                <select name="needs_service_type" id="needs_service_type">
+                    <option value="">Any</option>
+                    {% for service in service_intervals %}
+                    <option value="{{ service }}" {% if filters.needs_service_type == service %}selected{% endif %}>{{ service|title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" name="has_open_issues" id="has_open_issues" value="y" {% if filters.has_open_issues == 'y' %}checked{% endif %}>
+                <label for="has_open_issues">Has Open Issues</label>
+            </div>
+        </div>
+        <div class="form-actions">
+            <a href="{{ url_for('index') }}" class="button secondary">Clear Filters</a>
+        </div>
+    </form>
+
+    <div id="car-list-container">
+        {% include '_car_list.html' %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // JavaScript to make the filter form "live"
+    const filterForm = document.querySelector('.filter-form');
+    const carListContainer = document.getElementById('car-list-container');
+
+    // Debounce function to limit how often the form is submitted while typing
+    function debounce(func, delay = 350) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+
+    const updateCarList = async () => {
+        // Create a query string from the form data
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+        const queryString = params.toString();
+
+        try {
+            // Fetch the updated car list HTML from the server
+            const response = await fetch(`{{ url_for('index') }}?${queryString}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const newHtml = await response.text();
+
+            // Update the car list on the page
+            carListContainer.innerHTML = newHtml;
+
+            // Update the browser's URL without reloading the page
+            window.history.pushState({}, '', `{{ url_for('index') }}?${queryString}`);
+
+        } catch (error) {
+            console.error('Error fetching car list:', error);
+        }
+    };
+
+    const debouncedUpdate = debounce(updateCarList);
+
+    // Listen for changes on the form
+    filterForm.addEventListener('input', (event) => {
+        // For text inputs, use debounce. For others, update immediately.
+        if (event.target.type === 'text' || event.target.type === 'number') {
+            debouncedUpdate();
+        } else {
+            updateCarList();
+        }
+    });
+
+    // Prevent the default form submission which causes a page reload
+    filterForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+    });
+</script>
 {% endblock %}

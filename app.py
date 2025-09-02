@@ -2,7 +2,8 @@ import datetime
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 import database as db
-from car import Car
+from car import Car, SERVICE_INTERVALS
+from search_filter import _apply_filters
 
 # Get the absolute path of the directory containing this file
 _basedir = os.path.abspath(os.path.dirname(__file__))
@@ -19,8 +20,40 @@ db.init_db()
 @app.route('/')
 def index():
     """Home page: Lists all cars."""
-    cars = db.load_all_cars()
-    return render_template('index.html', cars=cars)
+    # Get filter criteria from query parameters to pass back to the template
+    form_values = {
+        'make': request.args.get('make', '').strip(),
+        'model': request.args.get('model', '').strip(),
+        'min_year': request.args.get('min_year', ''),
+        'max_year': request.args.get('max_year', ''),
+        'max_mileage': request.args.get('max_mileage', ''),
+        'has_open_issues': request.args.get('has_open_issues', ''),
+        'needs_service_type': request.args.get('needs_service_type', '').strip(),
+    }
+
+    # Build a dictionary of only the active filters to pass to the logic
+    active_filters = {}
+    if form_values['make']: active_filters['make'] = form_values['make']
+    if form_values['model']: active_filters['model'] = form_values['model']
+    if form_values['min_year']: active_filters['min_year'] = int(form_values['min_year'])
+    if form_values['max_year']: active_filters['max_year'] = int(form_values['max_year'])
+    if form_values['max_mileage']: active_filters['max_mileage'] = int(form_values['max_mileage'])
+    if form_values['has_open_issues'] == 'y': active_filters['has_open_issues'] = True
+    if form_values['needs_service_type']: active_filters['needs_service_type'] = form_values['needs_service_type']
+
+    all_cars = db.load_all_cars()
+    
+    if active_filters:
+        filtered_cars = _apply_filters(all_cars, active_filters)
+    else:
+        filtered_cars = all_cars
+
+    # If the request is an AJAX request, return only the list partial
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template('_car_list.html', cars=filtered_cars)
+
+    # Otherwise, for a full page load, return the whole page
+    return render_template('index.html', cars=filtered_cars, filters=form_values, service_intervals=SERVICE_INTERVALS.keys())
 
 @app.route('/car/<int:car_id>')
 def car_detail(car_id):
@@ -32,8 +65,9 @@ def car_detail(car_id):
     # Reuse the logic from the CLI to get upcoming services
     upcoming_services = car.get_upcoming_services()
     open_issues = [log for log in car.get_diagnostic_history() if log['status'] == 'open']
+    today_date = datetime.date.today().isoformat()
 
-    return render_template('car_detail.html', car=car, upcoming_services=upcoming_services, open_issues=open_issues)
+    return render_template('car_detail.html', car=car, upcoming_services=upcoming_services, open_issues=open_issues, today_date=today_date)
 
 @app.route('/car/add', methods=['GET', 'POST'])
 def add_car():
