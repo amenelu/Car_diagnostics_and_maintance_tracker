@@ -96,7 +96,7 @@ class TestDatabase(unittest.TestCase):
 
         # Resolve the diagnostic log
         resolved_log = car.resolve_diagnostic(0, "Replaced O2 sensor.")
-        db.resolve_diagnostic_log(car.id, resolved_log)
+        db.resolve_diagnostic_log(resolved_log)
 
         loaded_car = db.load_all_cars()[0]
         self.assertEqual(len(loaded_car.maintenance_logs), 1)

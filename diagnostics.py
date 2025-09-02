@@ -5,7 +5,7 @@ def log_diagnostic_issue(cars_list):
     """Logs a new diagnostic issue for a selected car."""
     car = select_car(cars_list)
     if not car:
-give        return False
+        return False
 
     print(f"\n--- Logging Diagnostic Issue for {car.make} {car.model} ---")
     description = input("Enter a description of the issue (e.g., 'Check engine light on'): ")
@@ -58,7 +58,7 @@ def manage_car_diagnostics(car):
             resolved_log = car.resolve_diagnostic(choice_index, resolution)
             if resolved_log:
                 print("Issue marked as resolved.")
-                db.resolve_diagnostic_log(car.id, resolved_log)
+                db.resolve_diagnostic_log(resolved_log)
                 made_change = True
         except (ValueError, IndexError):
             print("Invalid input. Please enter a valid issue number.")

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="header-actions">
+        <h2>Your Fleet</h2>
+        <a href="{{ url_for('add_car') }}" class="button">Add New Car</a>
+    </div>
+
+    {% if cars %}
+    <table class="car-list">
+        <thead>
+            <tr>
+                <th>Car</th>
+                <th>Year</th>
+                <th>Mileage</th>
+                <th>License Plate</th>
+                <th>VIN</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for car in cars %}
+            <tr onclick="window.location='{{ url_for('car_detail', car_id=car.id) }}';">
+                <td>{{ car.make }} {{ car.model }}</td>
+                <td>{{ car.year }}</td>
+                <td>{{ "{:,}".format(car.milage) }}</td>
+                <td>{{ car.license_plate }}</td>
+                <td>{{ car.vin }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No cars found in the system. <a href="{{ url_for('add_car') }}">Add one now!</a></p>
+    {% endif %}
+{% endblock %}

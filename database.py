@@ -89,7 +89,31 @@ def load_all_cars():
         if row['car_id'] in cars_map:
             cars_map[row['car_id']].diagnostic_logs.append(dict(row))
             
-    return car_objectsef check_vin_exists(vin, exclude_id=None):
+    return car_objects
+
+def load_car_by_id(car_id):
+    """Loads a single car and its logs from the database by its ID."""
+    conn = get_db_connection()
+    car_row = conn.execute("SELECT * FROM cars WHERE id = ?", (car_id,)).fetchone()
+    
+    if not car_row:
+        conn.close()
+        return None
+
+    car = Car.from_dict(dict(car_row))
+
+    maint_logs_rows = conn.execute("SELECT * FROM maintenance_logs WHERE car_id = ?", (car_id,)).fetchall()
+    for row in maint_logs_rows:
+        car.maintenance_logs.append(dict(row))
+
+    diag_logs_rows = conn.execute("SELECT * FROM diagnostic_logs WHERE car_id = ?", (car_id,)).fetchall()
+    for row in diag_logs_rows:
+        car.diagnostic_logs.append(dict(row))
+        
+    conn.close()
+    return car
+
+def check_vin_exists(vin, exclude_id=None):
     """Checks if a VIN exists in the database, optionally excluding a car ID."""
     conn = get_db_connection()
     query = "SELECT id FROM cars WHERE vin = ?"
@@ -145,32 +169,35 @@ def delete_car_by_id(car_id):
 def add_maintenance_log(car_id, log):
     """Adds a maintenance log to the database."""
     conn = get_db_connection()
-    conn.execute(
+    cursor = conn.cursor()
+    cursor.execute(
         "INSERT INTO maintenance_logs (car_id, service, cost, milage, date) VALUES (?, ?, ?, ?, ?)",
         (car_id, log['service'], log['cost'], log['milage'], log['date'])
     )
+    log['id'] = cursor.lastrowid # Add the ID to the dictionary
     conn.commit()
     conn.close()
 
 def add_diagnostic_log(car_id, log):
     """Adds a diagnostic log to the database."""
     conn = get_db_connection()
-    conn.execute(
+    cursor = conn.cursor()
+    cursor.execute(
         "INSERT INTO diagnostic_logs (car_id, description, code, date_logged, status) VALUES (?, ?, ?, ?, ?)",
         (car_id, log['description'], log['code'], log['date_logged'], log['status'])
     )
+    log['id'] = cursor.lastrowid # Add the ID to the dictionary
     conn.commit()
     conn.close()
 
-def resolve_diagnostic_log(car_id, log):
+def resolve_diagnostic_log(log):
     """Updates a diagnostic log to 'resolved' in the database."""
     conn = get_db_connection()
-    # Find the specific log by attributes that are effectively unique for an open issue
     conn.execute(
         """UPDATE diagnostic_logs 
            SET status = ?, resolution = ?, resolved_date = ?
-           WHERE car_id = ? AND description = ? AND date_logged = ? AND status = 'open'""",
-        (log['status'], log['resolution'], log['resolved_date'], car_id, log['description'], log['date_logged'])
+           WHERE id = ?""",
+        (log['status'], log['resolution'], log['resolved_date'], log['id'])
     )
     conn.commit()
     conn.close()
