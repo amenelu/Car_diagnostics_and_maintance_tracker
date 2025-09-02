@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="header-actions">
+        <h2>{{ car.year }} {{ car.make }} {{ car.model }}</h2>
+        <div>
+            <a href="{{ url_for('edit_car', car_id=car.id) }}" class="button">Edit Car</a>
+            <form action="{{ url_for('delete_car', car_id=car.id) }}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this car?');">
+                <button type="submit" class="button danger">Delete Car</button>
+            </form>
+        </div>
+    </div>
+    <p><strong>VIN:</strong> {{ car.vin }} | <strong>Plate:</strong> {{ car.license_plate }} | <strong>Mileage:</strong> {{ "{:,}".format(car.milage) }}</p>
+
+    <div class="grid-container">
+        <!-- Upcoming Services -->
+        <div class="card">
+            <h3>Upcoming / Due Services</h3>
+            {% if upcoming_services %}
+                <ul>
+                {% for service in upcoming_services %}
+                    <li>{{ service|title }}</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>All services are up-to-date.</p>
+            {% endif %}
+        </div>
+
+        <!-- Open Diagnostic Issues -->
+        <div class="card">
+            <h3>Open Diagnostic Issues</h3>
+            {% if open_issues %}
+                {% for issue in open_issues %}
+                <div class="issue">
+                    <p><strong>{{ issue.description }}</strong> ({{ issue.date_logged }})</p>
+                    <form action="{{ url_for('resolve_diagnostic', car_id=car.id, log_id=issue.id) }}" method="post">
+                        <input type="text" name="resolution" placeholder="Enter resolution notes..." required>
+                        <button type="submit" class="button small">Resolve</button>
+                    </form>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No open issues found.</p>
+            {% endif %}
+        </div>
+
+        <!-- Add Maintenance Log -->
+        <div class="card full-width">
+            <h3>Add Maintenance Record</h3>
+            <form action="{{ url_for('add_maintenance_log', car_id=car.id) }}" method="post" class="log-form">
+                <input type="date" name="date" value="{{ 'now'|datetime('today') }}" required>
+                <input type="text" name="service" placeholder="Service Type (e.g., oil change)" required>
+                <input type="number" name="milage" placeholder="Mileage at Service" value="{{ car.milage }}" required>
+                <input type="number" name="cost" step="0.01" placeholder="Cost" required>
+                <button type="submit" class="button">Add Record</button>
+            </form>
+        </div>
+
+        <!-- Add Diagnostic Issue -->
+        <div class="card full-width">
+            <h3>Log a New Diagnostic Issue</h3>
+            <form action="{{ url_for('add_diagnostic_log', car_id=car.id) }}" method="post" class="log-form">
+                <input type="text" name="description" placeholder="Issue Description" required>
+                <input type="text" name="code" placeholder="Diagnostic Code (e.g., P0420)">
+                <button type="submit" class="button">Log Issue</button>
+            </form>
+        </div>
+
+        <!-- Maintenance History -->
+        <div class="card full-width">
+            <h3>Maintenance History</h3>
+            {% if car.get_maintenance_history() %}
+            <table>
+                <thead>
+                    <tr><th>Date</th><th>Service</th><th>Mileage</th><th>Cost</th></tr>
+                </thead>
+                <tbody>
+                {% for log in car.get_maintenance_history() %}
+                    <tr>
+                        <td>{{ log.date }}</td>
+                        <td>{{ log.service|title }}</td>
+                        <td>{{ "{:,}".format(log.milage) }}</td>
+                        <td>${{ "%.2f"|format(log.cost) }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No maintenance history recorded.</p>
+            {% endif %}
+        </div>
+
+        <!-- Diagnostic History -->
+        <div class="card full-width">
+            <h3>Diagnostic History</h3>
+            {% if car.get_diagnostic_history() %}
+            <table>
+                <thead>
+                    <tr><th>Date</th><th>Status</th><th>Description</th><th>Resolution</th></tr>
+                </thead>
+                <tbody>
+                {% for log in car.get_diagnostic_history() %}
+                    <tr>
+                        <td>{{ log.date_logged }}</td>
+                        <td><span class="status {{ log.status }}">{{ log.status|title }}</span></td>
+                        <td>{{ log.description }}{% if log.code %} ({{ log.code }}){% endif %}</td>
+                        <td>{% if log.status == 'resolved' %}{{ log.resolution }} ({{ log.resolved_date }}){% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No diagnostic history recorded.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
