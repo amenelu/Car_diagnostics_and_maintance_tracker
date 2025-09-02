@@ -164,7 +164,7 @@ tbody tr:hover {
     width: auto;
     margin-right: 0.5rem;
 }
-input[type="text"], input[type="number"], input[type="date"], select {
+input[type="text"], input[type="number"], input[type="date"], select, input[type="file"] {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--border-color);
@@ -173,7 +173,7 @@ input[type="text"], input[type="number"], input[type="date"], select {
     background-color: var(--light-gray);
     transition: border-color 0.2s, box-shadow 0.2s;
 }
-input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus {
+input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus, input[type="file"]:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
@@ -245,4 +245,24 @@ input[readonly] {
 .issue:last-child {
     border-bottom: none;
     margin-bottom: 0;
+}
+
+/* --- Image Gallery --- */
+.image-gallery {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+.image-container {
+    flex: 1;
+    min-width: 300px;
+}
+.image-container h4 {
+    margin-bottom: 0.5rem;
+}
+.image-container img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
 }

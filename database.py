@@ -25,7 +25,9 @@ def init_db():
         year INTEGER NOT NULL,
         milage INTEGER NOT NULL,
         vin TEXT NOT NULL UNIQUE,
-        license_plate TEXT NOT NULL UNIQUE
+        license_plate TEXT NOT NULL UNIQUE,
+        image_before TEXT,
+        image_after TEXT
     )
     """)
 
@@ -142,8 +144,8 @@ def add_car(car):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO cars (make, model, year, milage, vin, license_plate) VALUES (?, ?, ?, ?, ?, ?)",
-        (car.make, car.model, car.year, car.milage, car.vin, car.license_plate)
+        "INSERT INTO cars (make, model, year, milage, vin, license_plate, image_before, image_after) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (car.make, car.model, car.year, car.milage, car.vin, car.license_plate, car.image_before, car.image_after)
     )
     car.id = cursor.lastrowid
     conn.commit()
@@ -153,8 +155,8 @@ def update_car_details(car):
     """Updates a car's editable details (mileage, license plate) in the database."""
     conn = get_db_connection()
     conn.execute(
-        "UPDATE cars SET milage = ?, license_plate = ? WHERE id = ?",
-        (car.milage, car.license_plate, car.id)
+        "UPDATE cars SET milage = ?, license_plate = ?, image_before = ?, image_after = ? WHERE id = ?",
+        (car.milage, car.license_plate, car.image_before, car.image_after, car.id)
     )
     conn.commit()
     conn.close()
@@ -215,8 +217,8 @@ def reset_database(snapshot):
     # Re-populate all tables from the snapshot
     for car_data in snapshot:
         cursor.execute(
-            "INSERT INTO cars (id, make, model, year, milage, vin, license_plate) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (car_data['id'], car_data['make'], car_data['model'], car_data['year'], car_data['milage'], car_data['vin'], car_data['license_plate'])
+            "INSERT INTO cars (id, make, model, year, milage, vin, license_plate, image_before, image_after) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (car_data['id'], car_data['make'], car_data['model'], car_data['year'], car_data['milage'], car_data['vin'], car_data['license_plate'], car_data.get('image_before'), car_data.get('image_after'))
         )
         car_id = car_data['id']
         

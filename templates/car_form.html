@@ -2,8 +2,8 @@
 
 {% block content %}
     <h2>{% if car %}Edit Car{% else %}Add a New Car{% endif %}</h2>
-
-    <form method="post" class="car-form">
+    <!-- Add enctype for file uploads -->
+    <form method="post" class="car-form" enctype="multipart/form-data">
         {% if car %}
             <input type="hidden" name="car_id" value="{{ car.id }}">
         {% endif %}
@@ -31,6 +31,17 @@
             <label for="license_plate">License Plate</label>
             <input type="text" id="license_plate" name="license_plate" value="{{ car.license_plate if car else '' }}" required>
         </div>
+        <!-- Image upload fields only appear when editing a car -->
+        {% if car %}
+        <div class="form-group">
+            <label for="image_before">"Before" Image (optional)</label>
+            <input type="file" id="image_before" name="image_before" accept="image/*">
+        </div>
+        <div class="form-group">
+            <label for="image_after">"After" Image (optional)</label>
+            <input type="file" id="image_after" name="image_after" accept="image/*">
+        </div>
+        {% endif %}
         <div class="form-actions">
             <a href="{{ url_for('index') }}" class="button secondary">Cancel</a>
             <button type="submit" class="button">{% if car %}Save Changes{% else %}Add Car{% endif %}</button>

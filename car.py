@@ -8,7 +8,7 @@ SERVICE_INTERVALS = {
     "timing belt": (100000, 2555) # ~7 years
 }
 class Car:
-    def __init__(self, make, model, year, milage, vin, license_plate, id=None):
+    def __init__(self, make, model, year, milage, vin, license_plate, id=None, image_before=None, image_after=None):
         self.make = make
         self.id = id
         self.model = model
@@ -16,6 +16,8 @@ class Car:
         self.milage = milage
         self.vin = vin
         self.license_plate = license_plate
+        self.image_before = image_before
+        self.image_after = image_after
         self.maintenance_logs = []
         self.diagnostic_logs = []
 
@@ -140,6 +142,8 @@ class Car:
             "milage": self.milage,
             "vin": self.vin,
             "license_plate": self.license_plate,
+            "image_before": self.image_before,
+            "image_after": self.image_after,
             "maintenance_logs": self.maintenance_logs,
             "diagnostic_logs": self.diagnostic_logs,
         }
@@ -154,7 +158,9 @@ class Car:
             year=data["year"],
             milage=data["milage"],
             vin=data["vin"],
-            license_plate=data.get("license_plate", "N/A") # For backward compatibility
+            license_plate=data.get("license_plate", "N/A"), # For backward compatibility
+            image_before=data.get("image_before"),
+            image_after=data.get("image_after")
         )
         # Logs will be populated by the loader function, so we just initialize here.
         car.maintenance_logs = data.get("maintenance_logs", []) 

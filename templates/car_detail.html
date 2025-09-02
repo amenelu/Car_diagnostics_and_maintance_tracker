@@ -12,6 +12,27 @@
     </div>
     <p><strong>VIN:</strong> {{ car.vin }} | <strong>Plate:</strong> {{ car.license_plate }} | <strong>Mileage:</strong> {{ "{:,}".format(car.milage) }}</p>
 
+    <!-- Image Gallery -->
+    {% if car.image_before or car.image_after %}
+    <div class="card full-width">
+        <h3>Body Work / Accident Images</h3>
+        <div class="image-gallery">
+            {% if car.image_before %}
+            <div class="image-container">
+                <h4>Before</h4>
+                <img src="{{ url_for('static', filename='uploads/' + car.image_before) }}" alt="Before image of {{car.make}} {{car.model}}">
+            </div>
+            {% endif %}
+            {% if car.image_after %}
+            <div class="image-container">
+                <h4>After</h4>
+                <img src="{{ url_for('static', filename='uploads/' ' + car.image_after) }}" alt="After image of {{car.make}} {{car.model}}">
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
     <div class="grid-container">
         <!-- Upcoming Services -->
         <div class="card">

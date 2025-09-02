@@ -1,9 +1,11 @@
 import datetime
 import os
+import time
 from flask import Flask, render_template, request, redirect, url_for, flash
 import database as db
 from car import Car, SERVICE_INTERVALS
 from search_filter import _apply_filters
+from werkzeug.utils import secure_filename
 
 # Get the absolute path of the directory containing this file
 _basedir = os.path.abspath(os.path.dirname(__file__))
@@ -13,6 +15,11 @@ app = Flask(__name__,
             static_folder=os.path.join(_basedir, 'static'),
             template_folder=os.path.join(_basedir, 'templates'))
 app.secret_key = 'supersecretkey' # Needed for flashing messages
+
+# Configure the upload folder
+UPLOAD_FOLDER = os.path.join(_basedir, 'static', 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Initialize the database
 db.init_db()
@@ -107,6 +114,23 @@ def edit_car(car_id):
         # Update car object from form data
         car.milage = int(request.form['milage'])
         car.license_plate = request.form['license_plate'].upper()
+
+        # Handle 'before' image upload
+        if 'image_before' in request.files:
+            file = request.files['image_before']
+            if file.filename != '':
+                # Generate a unique, secure filename
+                filename = f"{car.vin}-before-{int(time.time())}-{secure_filename(file.filename)}"
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                car.image_before = filename
+
+        # Handle 'after' image upload
+        if 'image_after' in request.files:
+            file = request.files['image_after']
+            if file.filename != '':
+                filename = f"{car.vin}-after-{int(time.time())}-{secure_filename(file.filename)}"
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                car.image_after = filename
         
         db.update_car_details(car)
         flash(f"Car '{car.make} {car.model}' updated successfully!", 'success')
