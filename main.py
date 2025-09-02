@@ -23,16 +23,14 @@ def add_car():
     
     while True:
         vin=input("Enter the car VIN:").upper() # Standardize to uppercase
-        # Check if a car with this VIN already exists
-        if any(car.vin == vin for car in cars):
+        if db.check_vin_exists(vin):
             print(f"A car with VIN {vin} already exists. Please enter a unique VIN.")
         else:
             break
 
     while True:
         license_plate = input("Enter the license plate: ").upper()
-        # Check if a car with this license plate already exists
-        if any(car.license_plate == license_plate for car in cars):
+        if db.check_license_plate_exists(license_plate):
             print(f"A car with license plate {license_plate} already exists. Please enter a unique license plate.")
         else:
             break
@@ -114,7 +112,7 @@ def edit_car():
         elif choice == '2':
             while True:
                 new_plate = input("Enter new license plate: ").upper()
-                if any(c.license_plate == new_plate and c.vin != car_to_edit.vin for c in cars):
+                if db.check_license_plate_exists(new_plate, exclude_id=car_to_edit.id):
                     print(f"Error: License plate '{new_plate}' is already in use by another car.")
                 else:
                     car_to_edit.license_plate = new_plate
@@ -148,8 +146,8 @@ def delete_car():
         print("Deletion cancelled.")
         return False
 
-def main():
-    """Main application loop."""
+def display_main_menu():
+    """Prints the main menu options."""
     global cars
     print(f"Welcome! {len(cars)} car(s) loaded from file.")
     while True:
@@ -174,19 +172,31 @@ def main():
         print("\n-------------------")
         print("14. Exit")
 
+def main():
+    """Main application loop."""
+    global cars
+    
+    while True:
+        ui_helpers.clear_screen()
+        print(f"--- Car Maintenance Tracker --- ({len(cars)} car(s) loaded)")
+        display_main_menu()
         choice=input("Enter your choice: ")
 
         # Actions that don't modify state
         if choice=="5":
             maintenance.service_history(cars) # View-only, no save needed
+            ui_helpers.press_enter_to_continue()
         elif choice=="6":
             maintenance.needs_service(cars) # View-only, no save needed
+            ui_helpers.press_enter_to_continue()
         elif choice == "7":
             maintenance.view_service_reminders(cars)
+            ui_helpers.press_enter_to_continue()
         elif choice=="10":
             search_for_car()
         elif choice == "11":
             search_filter.search_and_filter_cars(cars)
+            ui_helpers.press_enter_to_continue()
         elif choice=="14":
             print("Exiting... Goodbye")
             break
@@ -208,8 +218,12 @@ def main():
             elif choice == "9":
                 changed = diagnostics.view_and_resolve_diagnostics(cars)
 
-            if not changed:
+            if changed:
+                # Reload the car list from the DB to reflect any changes
+                cars = db.load_all_cars()
+            else:
                 history.discard_last_record()
+            ui_helpers.press_enter_to_continue()
         
         # Undo/Redo
         elif choice == "12":
@@ -218,14 +232,17 @@ def main():
                 db.reset_database([c.to_dict() for c in new_cars_state])
                 cars = db.load_all_cars() # Reload from DB to ensure consistency
                 print("Undo successful.")
+            ui_helpers.press_enter_to_continue()
         elif choice == "13":
             new_cars_state = history.redo(cars)
             if new_cars_state is not None:
                 db.reset_database([c.to_dict() for c in new_cars_state])
                 cars = db.load_all_cars() # Reload from DB to ensure consistency
                 print("Redo successful.")
+            ui_helpers.press_enter_to_continue()
         else:
             print("Invalid choice. Please input a number between 1 and 14.")
+            ui_helpers.press_enter_to_continue()
 
 if __name__ == "__main__":
     main()

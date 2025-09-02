@@ -1,4 +1,6 @@
 import datetime
+import os
+import platform
 
 def get_user_input_int(prompt, min_val=None, max_val=None, allow_empty=False):
     """Helper function to get a valid integer from the user within an optional range."""
@@ -33,3 +35,12 @@ def select_car(cars_list):
     list_cars(cars_list)
     car_index = get_user_input_int("Select a car by number: ", min_val=1, max_val=len(cars_list)) - 1
     return cars_list[car_index]
+
+def clear_screen():
+    """Clears the terminal screen."""
+    command = 'cls' if platform.system() == 'Windows' else 'clear'
+    os.system(command)
+
+def press_enter_to_continue():
+    """Pauses execution and waits for the user to press Enter."""
+    input("\nPress Enter to continue...")

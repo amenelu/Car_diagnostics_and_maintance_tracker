@@ -1,4 +1,4 @@
-from ui_helpers import select_car
+from ui_helpers import select_car, clear_screen
 import database as db
 
 def log_diagnostic_issue(cars_list):
@@ -20,11 +20,12 @@ def manage_car_diagnostics(car):
     """Displays diagnostic issues for a given car and allows resolving them."""
     made_change = False
     while True:
+        clear_screen()
         history = car.get_diagnostic_history()
         open_issues = [log for log in history if log['status'] == 'open']
         resolved_issues = [log for log in history if log['status'] == 'resolved']
 
-        print(f"\n--- Diagnostic History for {car.make} {car.model} ---")
+        print(f"--- Diagnostic History for {car.make} {car.model} ---")
         if not history:
             print("No diagnostic issues found for this car.")
             return made_change
@@ -48,7 +49,7 @@ def manage_car_diagnostics(car):
         if not open_issues:
             break
 
-        resolve_choice = input("Enter the number of an issue to resolve, or press Enter to return to the main menu: ")
+        resolve_choice = input("Enter the number of an issue to resolve, or press Enter to return: ")
         if not resolve_choice:
             break
         try:

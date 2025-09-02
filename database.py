@@ -89,7 +89,29 @@ def load_all_cars():
         if row['car_id'] in cars_map:
             cars_map[row['car_id']].diagnostic_logs.append(dict(row))
             
-    return car_objects
+    return car_objectsef check_vin_exists(vin, exclude_id=None):
+    """Checks if a VIN exists in the database, optionally excluding a car ID."""
+    conn = get_db_connection()
+    query = "SELECT id FROM cars WHERE vin = ?"
+    params = [vin]
+    if exclude_id:
+        query += " AND id != ?"
+        params.append(exclude_id)
+    result = conn.execute(query, params).fetchone()
+    conn.close()
+    return result is not None
+
+def check_license_plate_exists(plate, exclude_id=None):
+    """Checks if a license plate exists, optionally excluding a car ID."""
+    conn = get_db_connection()
+    query = "SELECT id FROM cars WHERE license_plate = ?"
+    params = [plate]
+    if exclude_id:
+        query += " AND id != ?"
+        params.append(exclude_id)
+    result = conn.execute(query, params).fetchone()
+    conn.close()
+    return result is not None
 
 def add_car(car):
     """Adds a car to the database and updates the car object with its new ID."""
