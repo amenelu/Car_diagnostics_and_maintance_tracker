@@ -1,7 +1,9 @@
-from car import Car
+from src.car import Car
+
 
 class HistoryManager:
     """Manages undo and redo functionality by tracking states."""
+
     def __init__(self):
         self.undo_stack = []
         self.redo_stack = []

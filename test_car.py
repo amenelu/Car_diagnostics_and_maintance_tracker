@@ -1,6 +1,7 @@
 import unittest
 import datetime
-from car import Car
+from src.car import Car
+
 
 class TestCar(unittest.TestCase):
 
@@ -50,11 +51,15 @@ class TestCar(unittest.TestCase):
     def test_resolve_diagnostic(self):
         """Test resolving an open diagnostic issue."""
         self.car.log_diagnostic("Test issue")
-        open_issues_before = [log for log in self.car.diagnostic_logs if log['status'] == 'open']
+        open_issues_before = [
+            log for log in self.car.diagnostic_logs if log["status"] == "open"
+        ]
         self.assertEqual(len(open_issues_before), 1)
 
         self.car.resolve_diagnostic(0, "Resolved it.")
-        open_issues_after = [log for log in self.car.diagnostic_logs if log['status'] == 'open']
+        open_issues_after = [
+            log for log in self.car.diagnostic_logs if log["status"] == "open"
+        ]
         self.assertEqual(len(open_issues_after), 0)
 
     def test_log_maintenance_updates_mileage(self):
@@ -66,18 +71,21 @@ class TestCar(unittest.TestCase):
     def test_log_maintenance_does_not_lower_mileage(self):
         """Test that logging a service with lower mileage does not decrease the car's main mileage."""
         self.assertEqual(self.car.milage, 50000)
-        self.car.log_maintenance("oil change", 50, milage=49000) # e.g., correcting a past entry
+        self.car.log_maintenance(
+            "oil change", 50, milage=49000
+        )  # e.g., correcting a past entry
         self.assertEqual(self.car.milage, 50000)
 
     def test_serialization_deserialization(self):
         """Test that a car can be converted to a dict and back to an identical object."""
         self.car.log_diagnostic("Test issue")
         self.car.log_maintenance("oil change", 50, milage=45000)
-        
+
         car_dict = self.car.to_dict()
         rehydrated_car = Car.from_dict(car_dict)
 
         self.assertEqual(self.car.to_dict(), rehydrated_car.to_dict())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

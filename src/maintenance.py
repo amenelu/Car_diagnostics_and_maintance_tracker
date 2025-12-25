@@ -1,7 +1,8 @@
 import datetime
-from car import SERVICE_INTERVALS
-import database as db
-from ui_helpers import get_user_input_int, select_car
+from src.car import SERVICE_INTERVALS
+import src.database as db
+from src.cli.ui_helpers import get_user_input_int, select_car
+
 
 def display_service_history(car):
     """Displays the maintenance history for a given car."""
@@ -11,14 +12,18 @@ def display_service_history(car):
         return
     print(f"\n--- Service History for {car.make} {car.model} ---")
     for record in history:
-        print(f"  Date: {record['date']}, Service: {record['service']}, Mileage: {record['milage']}, Cost: ${record['cost']:.2f}")
+        print(
+            f"  Date: {record['date']}, Service: {record['service']}, Mileage: {record['milage']}, Cost: ${record['cost']:.2f}"
+        )
     print("-------------------------------------------------")
+
 
 def service_history(cars_list):
     """Prompts user to select a car and displays its maintenance history."""
     car = select_car(cars_list)
     if car:
         display_service_history(car)
+
 
 def add_service_record(cars_list):
     """Adds a new maintenance log to a selected car."""
@@ -30,8 +35,10 @@ def add_service_record(cars_list):
     milage = get_user_input_int("Enter the service mileage: ", min_val=0)
 
     if milage < car.milage:
-        print(f"Warning: The entered mileage ({milage}) is lower than the car's last recorded mileage ({car.milage}).")
-    
+        print(
+            f"Warning: The entered mileage ({milage}) is lower than the car's last recorded mileage ({car.milage})."
+        )
+
     while True:
         try:
             cost_str = input("Enter the service cost: ")
@@ -41,7 +48,9 @@ def add_service_record(cars_list):
             print("Invalid cost. Please enter a number.")
 
     while True:
-        date_str = input("Enter the service date (YYYY-MM-DD) or press Enter to use today's date: ")
+        date_str = input(
+            "Enter the service date (YYYY-MM-DD) or press Enter to use today's date: "
+        )
         if not date_str:
             date = datetime.date.today()
             break
@@ -52,25 +61,33 @@ def add_service_record(cars_list):
             except ValueError:
                 print("Invalid date format. Please use YYYY-MM-DD.")
 
-    new_log = car.log_maintenance(service_type, cost, milage=milage, date=date.isoformat())
+    new_log = car.log_maintenance(
+        service_type, cost, milage=milage, date=date.isoformat()
+    )
     db.add_maintenance_log(car.id, new_log)
     print("\nService record added successfully.")
     return True
+
 
 def needs_service(cars_list):
     """Checks if a selected car is due for a specific maintenance service."""
     car = select_car(cars_list)
     if not car:
         return
-    
+
     print("\nWhich service would you like to check?")
     print(f"Known services: {', '.join(SERVICE_INTERVALS.keys())}")
     service_type = input("Enter the service type: ").lower()
-    current_mileage = get_user_input_int(f"Enter the car's current mileage (last known: {car.milage}): ", min_val=0)
-    if car.needs_maintenance(service_type, current_mileage=current_mileage, verbose=True):
+    current_mileage = get_user_input_int(
+        f"Enter the car's current mileage (last known: {car.milage}): ", min_val=0
+    )
+    if car.needs_maintenance(
+        service_type, current_mileage=current_mileage, verbose=True
+    ):
         print(f"\nYES, the car is due for a '{service_type}'.")
     else:
         print(f"\nNO, the car is not yet due for a '{service_type}'.")
+
 
 def view_service_reminders(cars_list):
     """Scans all cars and reports any upcoming or due services."""
@@ -83,36 +100,41 @@ def view_service_reminders(cars_list):
     for car in cars_list:
         # For a general overview, we check against the car's last known mileage.
         # The user can get a more precise check via the "Check if a car is due for service" option.
-        due_services = car.get_upcoming_services() # Uses car.milage by default inside needs_maintenance
+        due_services = (
+            car.get_upcoming_services()
+        )  # Uses car.milage by default inside needs_maintenance
         if due_services:
             if not reminders_found:
                 # Print a header only if we find at least one reminder
                 print("The following cars are due for service:")
                 reminders_found = True
-            
-            print(f"\n  -> {car.year} {car.make} {car.model} (Plate: {car.license_plate}, Mileage: {car.milage})")
+
+            print(
+                f"\n  -> {car.year} {car.make} {car.model} (Plate: {car.license_plate}, Mileage: {car.milage})"
+            )
             for service in due_services:
                 print(f"     - Needs: {service.title()}")
 
     if not reminders_found:
         print("\nAll cars are up-to-date with their service schedules.")
-    
+
     print("--------------------------------------")
+
 
 def generate_car_summary_report(car):
     """Generates and displays a full summary report for a single car."""
     print(f"\n--- Summary Report for {car.make} {car.model} ---")
-    print(f"  {car}") # Uses the car's __str__ method for main details
+    print(f"  {car}")  # Uses the car's __str__ method for main details
     print("-------------------------------------------------")
 
     # --- Open Diagnostic Issues ---
     print("\n  Open Diagnostic Issues:")
-    open_issues = [log for log in car.diagnostic_logs if log['status'] == 'open']
+    open_issues = [log for log in car.diagnostic_logs if log["status"] == "open"]
     if not open_issues:
         print("    - No open diagnostic issues found.")
     else:
         for issue in open_issues:
-            code_str = f" (Code: {issue['code']})" if issue['code'] else ""
+            code_str = f" (Code: {issue['code']})" if issue["code"] else ""
             print(f"    - [{issue['date_logged']}] {issue['description']}{code_str}")
 
     # --- Upcoming Maintenance ---
@@ -123,5 +145,5 @@ def generate_car_summary_report(car):
     else:
         for service in due_services:
             print(f"    - {service.title()}")
-    
+
     print("\n----------------- End of Report -----------------")

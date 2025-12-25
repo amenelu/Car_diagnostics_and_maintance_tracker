@@ -1,28 +1,33 @@
-from car import Car
+from src.car import Car
 import datetime
 
 # Import the new modules
-import maintenance
-import diagnostics
-import ui_helpers
-import search_filter
-import database as db
-from history_manager import HistoryManager
+import src.maintenance as maintenance
+import src.cli.diagnostics as diagnostics
+import src.cli.ui_helpers as ui_helpers
+import src.search_filter as search_filter
+import src.database as db
+from src.history_manager import HistoryManager
 
 # Load existing cars from file at startup
-db.init_db() # Ensure DB and tables exist
+db.init_db()  # Ensure DB and tables exist
 cars = db.load_all_cars()
 history = HistoryManager()
 
+
 def add_car(cars_list):
-    make=input("Enter the car make:")
-    model=input("Enter the car model:")
+    make = input("Enter the car make:")
+    model = input("Enter the car model:")
     current_year = datetime.date.today().year
-    year=ui_helpers.get_user_input_int(f"Enter the car year (1900-{current_year+1}): ", min_val=1900, max_val=current_year + 1)
-    milage=ui_helpers.get_user_input_int("Enter the car mileage: ", min_val=0)
-    
+    year = ui_helpers.get_user_input_int(
+        f"Enter the car year (1900-{current_year+1}): ",
+        min_val=1900,
+        max_val=current_year + 1,
+    )
+    milage = ui_helpers.get_user_input_int("Enter the car mileage: ", min_val=0)
+
     while True:
-        vin=input("Enter the car VIN:").upper() # Standardize to uppercase
+        vin = input("Enter the car VIN:").upper()  # Standardize to uppercase
         if db.check_vin_exists(vin):
             print(f"A car with VIN {vin} already exists. Please enter a unique VIN.")
         else:
@@ -31,17 +36,20 @@ def add_car(cars_list):
     while True:
         license_plate = input("Enter the license plate: ").upper()
         if db.check_license_plate_exists(license_plate):
-            print(f"A car with license plate {license_plate} already exists. Please enter a unique license plate.")
+            print(
+                f"A car with license plate {license_plate} already exists. Please enter a unique license plate."
+            )
         else:
             break
 
-    new_car=Car(make,model,year,milage,vin, license_plate)
+    new_car = Car(make, model, year, milage, vin, license_plate)
 
     # add to the list
     cars_list.append(new_car)
-    db.add_car(new_car) # Save to DB and get ID assigned to the object
+    db.add_car(new_car)  # Save to DB and get ID assigned to the object
     print(f"\nCar '{new_car.make} {new_car.model}' added successfully.")
     return True
+
 
 def search_for_car(cars_list):
     """Finds a car by VIN or license plate and shows a sub-menu."""
@@ -72,16 +80,17 @@ def search_for_car(cars_list):
         print("4. Return to main menu")
         choice = input("Enter your choice: ")
 
-        if choice == '1':
+        if choice == "1":
             maintenance.display_service_history(found_car)
-        elif choice == '2':
+        elif choice == "2":
             diagnostics.manage_car_diagnostics(found_car)
-        elif choice == '3':
+        elif choice == "3":
             maintenance.generate_car_summary_report(found_car)
-        elif choice == '4':
+        elif choice == "4":
             break
         else:
             print("Invalid choice. Please try again.")
+
 
 def edit_car(cars_list):
     """Selects a car and allows editing its details."""
@@ -100,31 +109,34 @@ def edit_car(cars_list):
 
         choice = input("Enter your choice: ")
 
-        if choice == '1':
+        if choice == "1":
             new_mileage = ui_helpers.get_user_input_int(
                 f"Enter new mileage (current: {car_to_edit.milage}): ",
-                min_val=car_to_edit.milage
+                min_val=car_to_edit.milage,
             )
             car_to_edit.milage = new_mileage
             db.update_car_details(car_to_edit)
             made_change = True
             print("Mileage updated successfully.")
-        elif choice == '2':
+        elif choice == "2":
             while True:
                 new_plate = input("Enter new license plate: ").upper()
                 if db.check_license_plate_exists(new_plate, exclude_id=car_to_edit.id):
-                    print(f"Error: License plate '{new_plate}' is already in use by another car.")
+                    print(
+                        f"Error: License plate '{new_plate}' is already in use by another car."
+                    )
                 else:
                     car_to_edit.license_plate = new_plate
                     db.update_car_details(car_to_edit)
                     made_change = True
                     print("License plate updated successfully.")
                     break
-        elif choice == '3':
+        elif choice == "3":
             break
         else:
             print("Invalid choice. Please try again.")
     return made_change
+
 
 def delete_car(cars_list):
     """Selects a car and permanently deletes it from the system."""
@@ -135,9 +147,11 @@ def delete_car(cars_list):
 
     # Confirmation step to prevent accidental deletion
     print(f"\nYou have selected: {car_to_delete}")
-    confirm = input("Are you sure you want to PERMANENTLY delete this car? (yes/no): ").lower()
+    confirm = input(
+        "Are you sure you want to PERMANENTLY delete this car? (yes/no): "
+    ).lower()
 
-    if confirm == 'yes':
+    if confirm == "yes":
         cars_list.remove(car_to_delete)
         db.delete_car_by_id(car_to_delete.id)
         print("Car has been successfully deleted.")
@@ -145,6 +159,7 @@ def delete_car(cars_list):
     else:
         print("Deletion cancelled.")
         return False
+
 
 def display_main_menu():
     """Prints the main menu options."""
@@ -169,10 +184,11 @@ def display_main_menu():
     print("\n-------------------")
     print("14. Exit")
 
+
 def main():
     """Main application loop."""
     global cars
-    
+
     # Define actions that modify the state of the application
     state_modifying_actions = {
         "1": add_car,
@@ -196,7 +212,7 @@ def main():
         ui_helpers.clear_screen()
         print(f"--- Car Maintenance Tracker --- ({len(cars)} car(s) loaded)")
         display_main_menu()
-        choice=input("Enter your choice: ")
+        choice = input("Enter your choice: ")
 
         if choice in view_only_actions:
             view_only_actions[choice](cars)
@@ -211,26 +227,27 @@ def main():
             else:
                 history.discard_last_record()
             ui_helpers.press_enter_to_continue()
-        elif choice == "12": # Undo
+        elif choice == "12":  # Undo
             new_cars_state = history.undo(cars)
             if new_cars_state is not None:
                 db.reset_database([c.to_dict() for c in new_cars_state])
-                cars = db.load_all_cars() # Reload from DB to ensure consistency
+                cars = db.load_all_cars()  # Reload from DB to ensure consistency
                 print("Undo successful.")
             ui_helpers.press_enter_to_continue()
-        elif choice == "13": # Redo
+        elif choice == "13":  # Redo
             new_cars_state = history.redo(cars)
             if new_cars_state is not None:
                 db.reset_database([c.to_dict() for c in new_cars_state])
-                cars = db.load_all_cars() # Reload from DB to ensure consistency
+                cars = db.load_all_cars()  # Reload from DB to ensure consistency
                 print("Redo successful.")
             ui_helpers.press_enter_to_continue()
-        elif choice == "14": # Exit
+        elif choice == "14":  # Exit
             print("Exiting... Goodbye")
             break
         else:
             print("Invalid choice. Please input a number between 1 and 14.")
             ui_helpers.press_enter_to_continue()
+
 
 if __name__ == "__main__":
     main()

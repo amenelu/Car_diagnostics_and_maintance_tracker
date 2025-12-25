@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+env/
+.env
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+
+# User Uploads (Web App)
+src/web/static/uploads/*
+!src/web/static/uploads/.gitkeep
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
