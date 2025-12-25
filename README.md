@@ -12,6 +12,20 @@ A hybrid Python application designed to help car owners track maintenance histor
 - **Undo/Redo**: (CLI only) Revert accidental changes to car data.
 - **Data Persistence**: All data is stored in a local SQLite database.
 
+## Screenshots
+
+### Web Interface
+
+![Web Interface](docs/screenshots/home.png)
+![Web Interface](docs/car_detail/home.png)
+![Web Interface](docs/car_detail_2/home.png)
+![Web Interface](docs/edit_car/home.png)
+![Web Interface](docs/add_car/home.png)
+
+### CLI Interface
+
+![CLI Interface](screenshots/cli_interface.png)
+
 ## Project Structure
 
 ```text

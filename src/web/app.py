@@ -233,4 +233,4 @@ def resolve_diagnostic(car_id, log_id):
 
 if __name__ == "__main__":
     # Run the app in debug mode for development
-    app.run(debug=True)
+    app.run(debug=True, port=8000)
